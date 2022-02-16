@@ -139,26 +139,8 @@ export default function(hljs) {
     },
     keywords: {
       keyword:
-        'addhandler alias aggregate ansi as async assembly auto binary by byref byval ' + /* a-b */
-        'call case catch class compare const continue custom declare default delegate dim distinct do ' + /* c-d */
-        'each equals else elseif end mapped enum erase error event exit explicit finally for friend from function ' + /* e-f */
-        'get global goto group handles if implements imports in inherits interface into iterator ' + /* g-i */
-        'join key let lib loop me mid module mustinherit mustoverride mybase myclass ' + /* j-m */
-        'namespace narrowing new next notinheritable notoverridable ' + /* n */
-        'of off on operator option optional order overloads overridable overrides ' + /* o */
-        'paramarray partial preserve private property protected public ' + /* p */
-        'raiseevent readonly redim removehandler resume return mappedto	mymapped ' + /* r */
-        'select set shadows shared skip static step stop structure strict sub synclock ' + /* s */
-        'take text then throw to try unicode until using when where while widening with withevents writeonly yield' /* t-y */,
-      built_in:
-        // Operators https://docs.microsoft.com/dotnet/visual-basic/language-reference/operators
-        'addressof and andalso await directcast gettype getxmlnamespace is isfalse isnot istrue like mod nameof new not or orelse trycast typeof xor ' +
-        // Type Conversion Functions https://docs.microsoft.com/dotnet/visual-basic/language-reference/functions/type-conversion-functions
-        'cbool cbyte cchar cdate cdbl cdec cint clng cobj csbyte cshort csng cstr cuint culng cushort',
-      type:
-        // Data types https://docs.microsoft.com/dotnet/visual-basic/language-reference/data-types
-        'boolean byte char date decimal double integer long object sbyte short single string uinteger ulong ushort',
-      literal: 'true false nothing'
+        'addhandler  addressof  alias  and  andalso  ansi  as  ascending  assembly  async  auto  autoreleasepool  await  boolean  by  byref  byte  byval  call  case  catch  cbool  cbyte  cchar  cdate  cdbl  cdec  char  cint  class  clng  cobj  const  continue  csbyte  cshort  csng  cstr  ctrytype  ctype  cuint  culng  cushort  custom  decimal  declare  default  delegate  descending  dim  directcast  distinct  do  double  dynamic  each  else  elseif  end  endif  enum  equals  erase  error  event  exit  extends  false  finally  for  friend  from  function  get  gettype  getxmlnamespace  global  gosub  goto  group  handles  if  implements  imports  in  index  inherits  integer  interface  into  is  isfalse  isnot  istrue  iterator  join  key  lazy  let  lib  like  long  loop  mappedto  matching  me  mod  module  mustinherit  mustoverride  mybase  myclass  mymapped  namespace  namespace  narrowing  new  next  not  nothing  notinheritable  notoverridable  null  object  of  on  operator  option  optional  or  order  orelse  out  overloads  overridable  overrides  paramarray  partial  preserve  private  property  protected  ptr  public  raiseevent  readonly  record  redim  rem  removehandler  resume  return  sbyte  select  set  shadows  shared  short  single  skip  static  step  stop  string  structure  sub  synclock  take  then  throw  to  true  try  trycast  typeof  uinteger  ulong  unicode  unmanaged  unsafe  until  ushort  using  variant  wend  when  where  while  widening  with  withevents  writeonly  xor  yield  zip '
+      
     },
     illegal:
       '//|\\{|\\}|endif|gosub|variant|wend|^\\$ ' /* reserved deprecated keywords */,
