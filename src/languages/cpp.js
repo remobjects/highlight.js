@@ -4,10 +4,9 @@ Category: common, system
 Website: https://isocpp.org
 */
 
-import * as regex from '../lib/regex.js';
-
 /** @type LanguageFn */
 export default function(hljs) {
+  const regex = hljs.regex;
   // added for historic reasons because `hljs.C_LINE_COMMENT_MODE` does
   // not include such support nor can we be sure all the grammars depending
   // on it would desire this behavior
@@ -21,13 +20,14 @@ export default function(hljs) {
   const DECLTYPE_AUTO_RE = 'decltype\\(auto\\)';
   const NAMESPACE_RE = '[a-zA-Z_]\\w*::';
   const TEMPLATE_ARGUMENT_RE = '<[^<>]+>';
-  const FUNCTION_TYPE_RE = '(' +
+  const FUNCTION_TYPE_RE = '(?!struct)(' +
     DECLTYPE_AUTO_RE + '|' +
     regex.optional(NAMESPACE_RE) +
     '[a-zA-Z_]\\w*' + regex.optional(TEMPLATE_ARGUMENT_RE) +
   ')';
+
   const CPP_PRIMITIVE_TYPES = {
-    className: 'keyword',
+    className: 'type',
     begin: '\\b[a-z\\d_]*_t\\b'
   };
 
@@ -44,7 +44,7 @@ export default function(hljs) {
         contains: [ hljs.BACKSLASH_ESCAPE ]
       },
       {
-        begin: '(u8?|U|L)?\'(' + CHARACTER_ESCAPES + "|.)",
+        begin: '(u8?|U|L)?\'(' + CHARACTER_ESCAPES + '|.)',
         end: '\'',
         illegal: '.'
       },
@@ -76,7 +76,7 @@ export default function(hljs) {
     begin: /#\s*[a-z]+\b/,
     end: /$/,
     keywords: {
-      'meta-keyword':
+      keyword:
         'if else elif endif define undef warning error line ' +
         'pragma _Pragma ifdef ifndef include'
     },
@@ -86,13 +86,11 @@ export default function(hljs) {
         relevance: 0
       },
       hljs.inherit(STRINGS, {
-        className: 'meta-string'
+        className: 'string'
       }),
       {
-        className: 'meta-string',
-        begin: /<.*?>/,
-        end: /$/,
-        illegal: '\\n'
+        className: 'string',
+        begin: /<.*?>/
       },
       C_LINE_COMMENT_MODE,
       hljs.C_BLOCK_COMMENT_MODE
@@ -107,32 +105,319 @@ export default function(hljs) {
 
   const FUNCTION_TITLE = regex.optional(NAMESPACE_RE) + hljs.IDENT_RE + '\\s*\\(';
 
+  // https://en.cppreference.com/w/cpp/keyword
+  const RESERVED_KEYWORDS = [
+    'alignas',
+    'alignof',
+    'and',
+    'and_eq',
+    'asm',
+    'atomic_cancel',
+    'atomic_commit',
+    'atomic_noexcept',
+    'auto',
+    'bitand',
+    'bitor',
+    'break',
+    'case',
+    'catch',
+    'class',
+    'co_await',
+    'co_return',
+    'co_yield',
+    'compl',
+    'concept',
+    'const_cast|10',
+    'consteval',
+    'constexpr',
+    'constinit',
+    'continue',
+    'decltype',
+    'default',
+    'delete',
+    'do',
+    'dynamic_cast|10',
+    'else',
+    'enum',
+    'explicit',
+    'export',
+    'extern',
+    'false',
+    'final',
+    'for',
+    'friend',
+    'goto',
+    'if',
+    'import',
+    'inline',
+    'module',
+    'mutable',
+    'namespace',
+    'new',
+    'noexcept',
+    'not',
+    'not_eq',
+    'nullptr',
+    'operator',
+    'or',
+    'or_eq',
+    'override',
+    'private',
+    'protected',
+    'public',
+    'reflexpr',
+    'register',
+    'reinterpret_cast|10',
+    'requires',
+    'return',
+    'sizeof',
+    'static_assert',
+    'static_cast|10',
+    'struct',
+    'switch',
+    'synchronized',
+    'template',
+    'this',
+    'thread_local',
+    'throw',
+    'transaction_safe',
+    'transaction_safe_dynamic',
+    'true',
+    'try',
+    'typedef',
+    'typeid',
+    'typename',
+    'union',
+    'using',
+    'virtual',
+    'volatile',
+    'while',
+    'xor',
+    'xor_eq'
+  ];
+
+  // https://en.cppreference.com/w/cpp/keyword
+  const RESERVED_TYPES = [
+    'bool',
+    'char',
+    'char16_t',
+    'char32_t',
+    'char8_t',
+    'double',
+    'float',
+    'int',
+    'long',
+    'short',
+    'void',
+    'wchar_t',
+    'unsigned',
+    'signed',
+    'const',
+    'static'
+  ];
+
+  const TYPE_HINTS = [
+    'any',
+    'auto_ptr',
+    'barrier',
+    'binary_semaphore',
+    'bitset',
+    'complex',
+    'condition_variable',
+    'condition_variable_any',
+    'counting_semaphore',
+    'deque',
+    'false_type',
+    'future',
+    'imaginary',
+    'initializer_list',
+    'istringstream',
+    'jthread',
+    'latch',
+    'lock_guard',
+    'multimap',
+    'multiset',
+    'mutex',
+    'optional',
+    'ostringstream',
+    'packaged_task',
+    'pair',
+    'promise',
+    'priority_queue',
+    'queue',
+    'recursive_mutex',
+    'recursive_timed_mutex',
+    'scoped_lock',
+    'set',
+    'shared_future',
+    'shared_lock',
+    'shared_mutex',
+    'shared_timed_mutex',
+    'shared_ptr',
+    'stack',
+    'string_view',
+    'stringstream',
+    'timed_mutex',
+    'thread',
+    'true_type',
+    'tuple',
+    'unique_lock',
+    'unique_ptr',
+    'unordered_map',
+    'unordered_multimap',
+    'unordered_multiset',
+    'unordered_set',
+    'variant',
+    'vector',
+    'weak_ptr',
+    'wstring',
+    'wstring_view'
+  ];
+
+  const FUNCTION_HINTS = [
+    'abort',
+    'abs',
+    'acos',
+    'apply',
+    'as_const',
+    'asin',
+    'atan',
+    'atan2',
+    'calloc',
+    'ceil',
+    'cerr',
+    'cin',
+    'clog',
+    'cos',
+    'cosh',
+    'cout',
+    'declval',
+    'endl',
+    'exchange',
+    'exit',
+    'exp',
+    'fabs',
+    'floor',
+    'fmod',
+    'forward',
+    'fprintf',
+    'fputs',
+    'free',
+    'frexp',
+    'fscanf',
+    'future',
+    'invoke',
+    'isalnum',
+    'isalpha',
+    'iscntrl',
+    'isdigit',
+    'isgraph',
+    'islower',
+    'isprint',
+    'ispunct',
+    'isspace',
+    'isupper',
+    'isxdigit',
+    'labs',
+    'launder',
+    'ldexp',
+    'log',
+    'log10',
+    'make_pair',
+    'make_shared',
+    'make_shared_for_overwrite',
+    'make_tuple',
+    'make_unique',
+    'malloc',
+    'memchr',
+    'memcmp',
+    'memcpy',
+    'memset',
+    'modf',
+    'move',
+    'pow',
+    'printf',
+    'putchar',
+    'puts',
+    'realloc',
+    'scanf',
+    'sin',
+    'sinh',
+    'snprintf',
+    'sprintf',
+    'sqrt',
+    'sscanf',
+    'std',
+    'stderr',
+    'stdin',
+    'stdout',
+    'strcat',
+    'strchr',
+    'strcmp',
+    'strcpy',
+    'strcspn',
+    'strlen',
+    'strncat',
+    'strncmp',
+    'strncpy',
+    'strpbrk',
+    'strrchr',
+    'strspn',
+    'strstr',
+    'swap',
+    'tan',
+    'tanh',
+    'terminate',
+    'to_underlying',
+    'tolower',
+    'toupper',
+    'vfprintf',
+    'visit',
+    'vprintf',
+    'vsprintf'
+  ];
+
+  const LITERALS = [
+    'NULL',
+    'false',
+    'nullopt',
+    'nullptr',
+    'true'
+  ];
+
+  // https://en.cppreference.com/w/cpp/keyword
+  const BUILT_IN = [
+    '_Pragma'
+  ];
+
   const CPP_KEYWORDS = {
-    keyword: 'int float while private char char8_t char16_t char32_t catch import module export virtual operator sizeof ' +
-      'dynamic_cast|10 typedef const_cast|10 const for static_cast|10 union namespace ' +
-      'unsigned long volatile static protected bool template mutable if public friend ' +
-      'do goto auto void enum else break extern using asm case typeid wchar_t ' +
-      'short reinterpret_cast|10 default double register explicit signed typename try this ' +
-      'switch continue inline delete alignas alignof constexpr consteval constinit decltype ' +
-      'concept co_await co_return co_yield requires ' +
-      'noexcept static_assert thread_local restrict final override ' +
-      'atomic_bool atomic_char atomic_schar ' +
-      'atomic_uchar atomic_short atomic_ushort atomic_int atomic_uint atomic_long atomic_ulong atomic_llong ' +
-      'atomic_ullong new throw return ' +
-      'and and_eq bitand bitor compl not not_eq or or_eq xor xor_eq',
-    built_in: 'std string wstring cin cout cerr clog stdin stdout stderr stringstream istringstream ostringstream ' +
-      'auto_ptr deque list queue stack vector map set pair bitset multiset multimap unordered_set ' +
-      'unordered_map unordered_multiset unordered_multimap priority_queue make_pair array shared_ptr abort terminate abs acos ' +
-      'asin atan2 atan calloc ceil cosh cos exit exp fabs floor fmod fprintf fputs free frexp ' +
-      'fscanf future isalnum isalpha iscntrl isdigit isgraph islower isprint ispunct isspace isupper ' +
-      'isxdigit tolower toupper labs ldexp log10 log malloc realloc memchr memcmp memcpy memset modf pow ' +
-      'printf putchar puts scanf sinh sin snprintf sprintf sqrt sscanf strcat strchr strcmp ' +
-      'strcpy strcspn strlen strncat strncmp strncpy strpbrk strrchr strspn strstr tanh tan ' +
-      'vfprintf vprintf vsprintf endl initializer_list unique_ptr _Bool complex _Complex imaginary _Imaginary',
-    literal: 'true false nullptr NULL'
+    type: RESERVED_TYPES,
+    keyword: RESERVED_KEYWORDS,
+    literal: LITERALS,
+    built_in: BUILT_IN,
+    _type_hints: TYPE_HINTS
+  };
+
+  const FUNCTION_DISPATCH = {
+    className: 'function.dispatch',
+    relevance: 0,
+    keywords: {
+      // Only for relevance, not highlighting.
+      _hint: FUNCTION_HINTS
+    },
+    begin: regex.concat(
+      /\b/,
+      /(?!decltype)/,
+      /(?!if)/,
+      /(?!for)/,
+      /(?!switch)/,
+      /(?!while)/,
+      hljs.IDENT_RE,
+      regex.lookahead(/(<[^<>]+>|)\s*\(/))
   };
 
   const EXPRESSION_CONTAINS = [
+    FUNCTION_DISPATCH,
     PREPROCESSOR,
     CPP_PRIMITIVE_TYPES,
     C_LINE_COMMENT_MODE,
@@ -207,6 +492,12 @@ export default function(hljs) {
           NUMBERS
         ]
       },
+      // allow for multiple declarations, e.g.:
+      // extern void f(int), g(char);
+      {
+        relevance: 0,
+        match: /,/
+      },
       {
         className: 'params',
         begin: /\(/,
@@ -256,14 +547,18 @@ export default function(hljs) {
     ],
     keywords: CPP_KEYWORDS,
     illegal: '</',
+    classNameAliases: {
+      'function.dispatch': 'built_in'
+    },
     contains: [].concat(
       EXPRESSION_CONTEXT,
       FUNCTION_DECLARATION,
+      FUNCTION_DISPATCH,
       EXPRESSION_CONTAINS,
       [
         PREPROCESSOR,
         { // containers: ie, `vector <int> rooms (9);`
-          begin: '\\b(deque|list|queue|priority_queue|pair|stack|vector|map|set|bitset|multiset|multimap|unordered_map|unordered_set|unordered_multiset|unordered_multimap|array)\\s*<',
+          begin: '\\b(deque|list|queue|priority_queue|pair|stack|vector|map|set|bitset|multiset|multimap|unordered_map|unordered_set|unordered_multiset|unordered_multimap|array|tuple|optional|variant|function)\\s*<(?!<)',
           end: '>',
           keywords: CPP_KEYWORDS,
           contains: [
@@ -276,21 +571,17 @@ export default function(hljs) {
           keywords: CPP_KEYWORDS
         },
         {
-          className: 'class',
-          beginKeywords: 'enum class struct union',
-          end: /[{;:<>=]/,
-          contains: [
-            {
-              beginKeywords: "final class struct"
-            },
-            hljs.TITLE_MODE
-          ]
+          match: [
+            // extra complexity to deal with `enum class` and `enum struct`
+            /\b(?:enum(?:\s+(?:class|struct))?|class|struct|union)/,
+            /\s+/,
+            /\w+/
+          ],
+          className: {
+            1: 'keyword',
+            3: 'title.class'
+          }
         }
-      ]),
-    exports: {
-      preprocessor: PREPROCESSOR,
-      strings: STRINGS,
-      keywords: CPP_KEYWORDS
-    }
+      ])
   };
 }

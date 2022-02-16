@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 // For the basic introductions on using this build script, see:
 //
 // <https://highlightjs.readthedocs.org/en/latest/building-testing.html>
@@ -61,7 +62,7 @@
 
 const commander = require('commander');
 const path = require('path');
-const { clean } = require("./lib/makestuff");
+const { clean } = require("./lib/makestuff.js");
 const log = (...args) => console.log(...args);
 
 const TARGETS = ["cdn", "browser", "node"];
@@ -70,9 +71,10 @@ const dir = {};
 commander
   .usage('[options] [<language>...]')
   .option('-n, --no-minify', 'Disable minification')
+  .option('-ne, --no-esm', 'Disable building ESM')
   .option('-t, --target <name>',
-    'Build for target ' +
-    '[all, browser, cdn, node]',
+    'Build for target '
+    + '[all, browser, cdn, node]',
     'browser')
   .parse(process.argv);
 
@@ -85,7 +87,7 @@ async function doTarget(target, buildDir) {
   const build = require(`./build_${target}`);
   process.env.BUILD_DIR = buildDir;
   await clean(buildDir);
-  await build.build({ languages: commander.args, minify: commander.opts().minify });
+  await build.build({ languages: commander.args, minify: commander.opts().minify, esm: commander.opts().esm });
 }
 
 async function doBuild() {

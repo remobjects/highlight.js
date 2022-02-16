@@ -7,10 +7,9 @@ Category: assembler
 Audit: 2020
 */
 
-import * as regex from '../lib/regex.js';
-
 /** @type LanguageFn */
 export default function(hljs) {
+  const regex = hljs.regex;
   const IDENT_RE = /([-a-zA-Z$._][\w$.-]*)/;
   const TYPE = {
     className: 'type',
@@ -29,8 +28,8 @@ export default function(hljs) {
   const NUMBER = {
     className: 'number',
     variants: [
-        { begin: /0[xX][a-fA-F0-9]+/ },
-        { begin: /-?\d+(?:[.]\d+)?(?:[eE][-+]?\d+(?:[.]\d+)?)?/ }
+        { begin: /[su]?0[xX][KMLHR]?[a-fA-F0-9]+/ },
+        { begin: /[-+]?\d+(?:[.]\d+)?(?:[eE][-+]?\d+(?:[.]\d+)?)?/ }
     ],
     relevance: 0
   };
@@ -110,12 +109,15 @@ export default function(hljs) {
       // another language than an actual comment
       hljs.COMMENT(/;\s*$/, null, { relevance: 0 }),
       hljs.COMMENT(/;/, /$/),
-      hljs.QUOTE_STRING_MODE,
       {
         className: 'string',
-        variants: [
-          // Double-quoted string
-          { begin: /"/, end: /[^\\]"/ },
+        begin: /"/,
+        end: /"/,
+        contains: [
+          {
+            className: 'char.escape',
+            match: /\\\d\d/
+          }
         ]
       },
       FUNCTION,

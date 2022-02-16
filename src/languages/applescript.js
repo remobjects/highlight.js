@@ -6,10 +6,9 @@ Website: https://developer.apple.com/library/archive/documentation/AppleScript/C
 Audit: 2020
 */
 
-import * as regex from '../lib/regex.js';
-
 /** @type LanguageFn */
 export default function(hljs) {
+  const regex = hljs.regex;
   const STRING = hljs.inherit(
     hljs.QUOTE_STRING_MODE, {
       illegal: null
@@ -106,7 +105,7 @@ export default function(hljs) {
         'activate beep count delay launch log offset read round ' +
         'run say summarize write ' +
         'character characters contents day frontmost id item length ' +
-        'month name paragraph paragraphs rest reverse running time version ' +
+        'month name|0 paragraph paragraphs rest reverse running time version ' +
         'weekday word words year'
     },
     contains: [

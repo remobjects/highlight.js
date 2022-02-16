@@ -12,6 +12,8 @@
 # serve to show the default.
 
 import sys, os
+import sphinx_rtd_theme
+import myst_parser
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -25,7 +27,10 @@ import sys, os
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = []
+extensions = [
+  "sphinx_rtd_theme",
+  "myst_parser"
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -41,14 +46,14 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'highlight.js'
-copyright = u'2012–2020, Ivan Sagalaev'
+copyright = u'2012–2022, Ivan Sagalaev'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 
 # The full version, including alpha/beta/rc tags.
-release = '10.6.0'
+release = '11.4.0'
 # The short X.Y version.
 version = ".".join(release.split(".")[:2])
 
@@ -91,7 +96,7 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'default'
+html_theme = 'sphinx_rtd_theme'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the

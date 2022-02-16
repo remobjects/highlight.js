@@ -6,9 +6,8 @@ Website: https://daringfireball.net/projects/markdown/
 Category: common, markup
 */
 
-import * as regex from '../lib/regex.js';
-
 export default function(hljs) {
+  const regex = hljs.regex;
   const INLINE_HTML = {
     begin: /<\/?[A-Za-z_]/,
     end: '>',
@@ -105,12 +104,16 @@ export default function(hljs) {
       },
       // whatever else, lower relevance (might not be a link at all)
       {
-        begin: /\[.+?\]\(.*?\)/,
+        begin: /\[.*?\]\(.*?\)/,
         relevance: 0
       }
     ],
     returnBegin: true,
     contains: [
+      {
+        // empty strings for alt or link text
+        match: /\[(?=\])/
+      },
       {
         className: 'string',
         relevance: 0,
@@ -166,16 +169,23 @@ export default function(hljs) {
       }
     ]
   };
-  BOLD.contains.push(ITALIC);
-  ITALIC.contains.push(BOLD);
+
+  // 3 level deep nesting is not allowed because it would create confusion
+  // in cases like `***testing***` because where we don't know if the last
+  // `***` is starting a new bold/italic or finishing the last one
+  const BOLD_WITHOUT_ITALIC = hljs.inherit(BOLD, { contains: [] });
+  const ITALIC_WITHOUT_BOLD = hljs.inherit(ITALIC, { contains: [] });
+  BOLD.contains.push(ITALIC_WITHOUT_BOLD);
+  ITALIC.contains.push(BOLD_WITHOUT_ITALIC);
 
   let CONTAINABLE = [
     INLINE_HTML,
     LINK
   ];
 
-  BOLD.contains = BOLD.contains.concat(CONTAINABLE);
-  ITALIC.contains = ITALIC.contains.concat(CONTAINABLE);
+  [ BOLD, ITALIC, BOLD_WITHOUT_ITALIC, ITALIC_WITHOUT_BOLD ].forEach(m => {
+    m.contains = m.contains.concat(CONTAINABLE);
+  });
 
   CONTAINABLE = CONTAINABLE.concat(BOLD, ITALIC);
 

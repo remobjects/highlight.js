@@ -1,14 +1,9 @@
 .. highlight:: javascript
 
-Plugins
-=======
+Plugin API
+==========
 
-Highlight.js supports plugins.
-
-API
----
-
-You can add a plugin via the ``addPlugin`` API.
+Highlight.js supports plugins.  You add plugins via the ``addPlugin`` API.
 
 ::
 
@@ -18,10 +13,13 @@ You can add a plugin via the ``addPlugin`` API.
 
   // or simply a keyed object of functions
   addPlugin({
-    'after:highlightBlock': ({ block, result, text }) => {
+    'after:highlightElement': ({ el, result, text }) => {
       // ...
     }
   });
+
+Types of plugins
+----------------
 
 Class based plugins
 ^^^^^^^^^^^^^^^^^^^
@@ -38,32 +36,32 @@ your class and execute it's callbacks as necessary.
       self.prefix = options.dataPrefix;
     }
 
-    'after:highlightBlock'({ block, result, text }) {
+    'after:highlightElement'({ el, result, text }) {
       // ...
     }
   }
 
   hljs.addPlugin(new DataLanguagePlugin({ dataPrefix: 'hljs' }));
 
-Function based plugins
-^^^^^^^^^^^^^^^^^^^^^
+Function Based Plugins
+^^^^^^^^^^^^^^^^^^^^^^
 
 This approach is best for simpler plugins.
 
 ::
 
   hljs.addPlugin({
-    'after:highlightBlock': ({ block, result }) => {
+    'after:highlightElement': ({ el, result }) => {
       // move the language from the result into the dataset
-      block.dataset.language = result.language;
+      el.dataset.language = result.language;
     }
   });
 
-Callbacks
----------
+
+before:highlight
+----------------
 
 ``before:highlight({code, language})``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This callback function is passed a context object with two keys:
 
@@ -90,8 +88,10 @@ Note: This callback does not fire from highlighting resulting from auto-language
 It returns nothing.
 
 
+after:highlight
+---------------
+
 ``after:highlight(result)``
-^^^^^^^^^^^^^^^^^^^^^^^
 
 This callback function is passed the ``result`` object after highlighting is
 complete. Your plugin may make any changes it desires to the result object
@@ -101,19 +101,12 @@ Note: This callback does not fire from highlighting resulting from auto-language
 
 It returns nothing.
 
-``after:highlightBlock({block, result, text})``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Deprecated as of 10.7.  Please use ``after:highlightElement``.
 
-``before:highlightBlock({block, language})``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Deprecated as of 10.7.  Please use ``before:highlightElement``.
-
+after:highlightElement
+----------------------
 
 ``after:highlightElement({el, result, text})``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This callback function is passed an object with two keys:
 
@@ -129,8 +122,10 @@ text
 It returns nothing.
 
 
+before:highlightElement
+-----------------------
+
 ``before:highlightElement({el, language})``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This callback function is passed an object with two keys:
 
@@ -141,3 +136,16 @@ language
   The language determined from the class attribute (or undefined).
 
 It returns nothing.
+
+Deprecated
+----------
+
+after:highlightBlock
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. deprecated:: 10.7  Please use ``after:highlightElement``.
+
+before:highlightBlock
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. deprecated:: 10.7 Please use ``before:highlightElement``.
