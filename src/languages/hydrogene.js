@@ -1,9 +1,9 @@
 /*
-Language: C#
-Author: Jason Diamond <jason@diamond.name>
-Contributor: Nicolas LLOBERA <nllobera@gmail.com>, Pieter Vantorre <pietervantorre@gmail.com>, David Pine <david.pine@microsoft.com>
-Website: https://docs.microsoft.com/en-us/dotnet/csharp/
-Category: common
+Language: Hydrogene
+Author: Carlo Kok <ck@remobjects.com>
+Contributor: Jason Diamond <jason@diamond.name>, Nicolas LLOBERA <nllobera@gmail.com>, Pieter Vantorre <pietervantorre@gmail.com>, David Pine <david.pine@microsoft.com>
+Description: Hydrogene is RemObjects Software's C#-compatible language for the Elements compiler, with additional platform-specific extensions.
+Website: https://www.elementscompiler.com/elements/hydrogene/
 */
 
 /** @type LanguageFn */
@@ -153,9 +153,26 @@ export default function(hljs) {
     'module',
     'assembly'
   ];
+  // RemObjects Elements-specific extensions
+  const ELEMENTS_KEYWORDS = [
+    '__autoreleasepool',
+    '__selector',
+    '__weak',
+    '__strong',
+    '__unretained',
+    '__aspect',
+    '__mapped',
+    '__inline',
+    '__extension',
+    '__require',
+    '__ensure',
+    '__result',
+    '__old',
+    '__invariants'
+  ];
 
   const KEYWORDS = {
-    keyword: NORMAL_KEYWORDS.concat(CONTEXTUAL_KEYWORDS),
+    keyword: NORMAL_KEYWORDS.concat(CONTEXTUAL_KEYWORDS).concat(ELEMENTS_KEYWORDS),
     built_in: BUILT_IN_KEYWORDS,
     literal: LITERAL_KEYWORDS
   };
@@ -296,8 +313,8 @@ export default function(hljs) {
   };
 
   return {
-    name: 'C#',
-    aliases: ['cs', 'c#'],
+    name: 'Hydrogene',
+    aliases: ['hydrogene'],
     keywords: KEYWORDS,
     illegal: /::/,
     contains: [
