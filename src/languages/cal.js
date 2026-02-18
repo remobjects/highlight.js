@@ -3,6 +3,7 @@ Language: C/AL
 Author: Kenneth Fuglsang Christensen <kfuglsang@gmail.com>
 Description: Provides highlighting of Microsoft Dynamics NAV C/AL code files
 Website: https://docs.microsoft.com/en-us/dynamics-nav/programming-in-c-al
+Category: enterprise
 */
 
 /** @type LanguageFn */
@@ -42,25 +43,19 @@ export default function(hljs) {
     hljs.COMMENT(
       /\{/,
       /\}/,
-      {
-        relevance: 0
-      }
+      { relevance: 0 }
     ),
     hljs.COMMENT(
       /\(\*/,
       /\*\)/,
-      {
-        relevance: 10
-      }
+      { relevance: 10 }
     )
   ];
   const STRING = {
     className: 'string',
     begin: /'/,
     end: /'/,
-    contains: [{
-      begin: /''/
-    }]
+    contains: [ { begin: /''/ } ]
   };
   const CHAR_STRING = {
     className: 'string',

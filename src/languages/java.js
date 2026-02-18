@@ -5,9 +5,7 @@ Category: common, enterprise
 Website: https://www.java.com/
 */
 
-import {
-  NUMERIC as NUMBER
-} from "./lib/java.js";
+import { NUMERIC as NUMBER } from "./lib/java.js";
 
 /**
  * Allows recursive regex expressions to a given depth
@@ -32,8 +30,8 @@ function recurRegex(re, substitution, depth) {
 export default function(hljs) {
   const regex = hljs.regex;
   const JAVA_IDENT_RE = '[\u00C0-\u02B8a-zA-Z_$][\u00C0-\u02B8a-zA-Z_$0-9]*';
-  const GENERIC_IDENT_RE = JAVA_IDENT_RE +
-    recurRegex('(?:<' + JAVA_IDENT_RE + '~~~(?:\\s*,\\s*' + JAVA_IDENT_RE + '~~~)*>)?', /~~~/g, 2);
+  const GENERIC_IDENT_RE = JAVA_IDENT_RE
+    + recurRegex('(?:<' + JAVA_IDENT_RE + '~~~(?:\\s*,\\s*' + JAVA_IDENT_RE + '~~~)*>)?', /~~~/g, 2);
   const MAIN_KEYWORDS = [
     'synchronized',
     'abstract',
@@ -74,7 +72,11 @@ export default function(hljs) {
     'requires',
     'exports',
     'do',
-    'sealed'
+    'sealed',
+    'yield',
+    'permits',
+    'goto',
+    'when'
   ];
 
   const BUILT_INS = [
@@ -123,9 +125,7 @@ export default function(hljs) {
     end: /\)/,
     keywords: KEYWORDS,
     relevance: 0,
-    contains: [
-      hljs.C_BLOCK_COMMENT_MODE
-    ],
+    contains: [ hljs.C_BLOCK_COMMENT_MODE ],
     endsParent: true
   };
 
@@ -165,7 +165,7 @@ export default function(hljs) {
         begin: /"""/,
         end: /"""/,
         className: "string",
-        contains: [hljs.BACKSLASH_ESCAPE]
+        contains: [ hljs.BACKSLASH_ESCAPE ]
       },
       hljs.APOS_STRING_MODE,
       hljs.QUOTE_STRING_MODE,
@@ -191,7 +191,7 @@ export default function(hljs) {
           /\s+/,
           JAVA_IDENT_RE,
           /\s+/,
-          /=/
+          /=(?!=)/
         ],
         className: {
           1: "type",
@@ -227,9 +227,7 @@ export default function(hljs) {
           hljs.UNDERSCORE_IDENT_RE,
           /\s*(?=\()/
         ],
-        className: {
-          2: "title.function"
-        },
+        className: { 2: "title.function" },
         keywords: KEYWORDS,
         contains: [
           {

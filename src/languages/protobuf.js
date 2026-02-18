@@ -47,10 +47,14 @@ export default function(hljs) {
 
   return {
     name: 'Protocol Buffers',
+    aliases: ['proto'],
     keywords: {
       keyword: KEYWORDS,
       type: TYPES,
-      literal: ['true', 'false']
+      literal: [
+        'true',
+        'false'
+      ]
     },
     contains: [
       hljs.QUOTE_STRING_MODE,
@@ -61,13 +65,13 @@ export default function(hljs) {
       {
         className: 'function',
         beginKeywords: 'rpc',
-        end: /[{;]/, excludeEnd: true,
+        end: /[{;]/,
+        excludeEnd: true,
         keywords: 'rpc returns'
       },
       { // match enum items (relevance)
         // BLAH = ...;
-        begin: /^\s*[A-Z_]+(?=\s*=[^\n]+;$)/
-      }
+        begin: /^\s*[A-Z_]+(?=\s*=[^\n]+;$)/ }
     ]
   };
 }

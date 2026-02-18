@@ -1,5 +1,5 @@
 /*!
-  Theme: Tokyionight-Dark
+  Theme: Tokyo-night-Dark
   origin: https://github.com/enkia/tokyo-night-vscode-theme
   Description: Original highlight.js style
   Author: (c) Henri Vandersleyen <hvandersleyen@gmail.com>
@@ -88,7 +88,7 @@
 
 
 
-/* Purple */
+/* Magenta */
 /*INFO: Control Keywords, Storage Types, Regex symbols and operators, HTML Attributes, Terminal Magenta */
 .hljs-name,
 .hljs-keyword,
@@ -104,7 +104,6 @@
 .hljs-punctuation {color: #c0caf5}
 
 .hljs {
-  /* background: #002451; */
   background: #1a1b26;
   color: #9aa5ce;
 }

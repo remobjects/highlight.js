@@ -1,6 +1,7 @@
 /*
 Language: Delphi
 Website: https://www.embarcadero.com/products/delphi
+Category: system
 */
 
 /** @type LanguageFn */
@@ -136,12 +137,8 @@ export default function(hljs) {
   ];
   const COMMENT_MODES = [
     hljs.C_LINE_COMMENT_MODE,
-    hljs.COMMENT(/\{/, /\}/, {
-      relevance: 0
-    }),
-    hljs.COMMENT(/\(\*/, /\*\)/, {
-      relevance: 10
-    })
+    hljs.COMMENT(/\{/, /\}/, { relevance: 0 }),
+    hljs.COMMENT(/\(\*/, /\*\)/, { relevance: 10 })
   ];
   const DIRECTIVE = {
     className: 'meta',
@@ -160,9 +157,7 @@ export default function(hljs) {
     className: 'string',
     begin: /'/,
     end: /'/,
-    contains: [{
-      begin: /''/
-    }]
+    contains: [ { begin: /''/ } ]
   };
   const NUMBER = {
     className: 'number',
@@ -170,27 +165,40 @@ export default function(hljs) {
     // Source: https://www.freepascal.org/docs-html/ref/refse6.html
     variants: [
       {
+        // Regular numbers, e.g., 123, 123.456.
+        match: /\b\d[\d_]*(\.\d[\d_]*)?/ },
+      {
         // Hexadecimal notation, e.g., $7F.
-        begin: '\\$[0-9A-Fa-f]+'
-      },
+        match: /\$[\dA-Fa-f_]+/ },
+      {
+        // Hexadecimal literal with no digits
+        match: /\$/,
+        relevance: 0 },
       {
         // Octal notation, e.g., &42.
-        begin: '&[0-7]+'
-      },
+        match: /&[0-7][0-7_]*/ },
       {
         // Binary notation, e.g., %1010.
-        begin: '%[01]+'
-      }
+        match: /%[01_]+/ },
+      {
+        // Binary literal with no digits
+        match: /%/,
+        relevance: 0 }
     ]
   };
   const CHAR_STRING = {
     className: 'string',
-    begin: /(#\d+)+/
+    variants: [
+      { match: /#\d[\d_]*/ },
+      { match: /#\$[\dA-Fa-f][\dA-Fa-f_]*/ },
+      { match: /#&[0-7][0-7_]*/ },
+      { match: /#%[01][01_]*/ }
+    ]
   };
   const CLASS = {
     begin: hljs.IDENT_RE + '\\s*=\\s*class\\s*\\(',
     returnBegin: true,
-    contains: [hljs.TITLE_MODE]
+    contains: [ hljs.TITLE_MODE ]
   };
   const FUNCTION = {
     className: 'function',
@@ -227,7 +235,6 @@ export default function(hljs) {
     contains: [
       STRING,
       CHAR_STRING,
-      hljs.NUMBER_MODE,
       NUMBER,
       CLASS,
       FUNCTION,

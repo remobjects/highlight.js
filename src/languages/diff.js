@@ -11,13 +11,16 @@ export default function(hljs) {
   const regex = hljs.regex;
   return {
     name: 'Diff',
-    aliases: ['patch'],
+    aliases: [ 'patch' ],
     contains: [
       {
         className: 'meta',
         relevance: 10,
         match: regex.either(
-          /^@@ +-\d+,\d+ +\+\d+,\d+ +@@/,
+          /^@@ +-\d+,\d+ +\+\d+,\d+ +@@/, // @@ -1,2 +1,2 @@
+          /^@@ +-\d+ +\+\d+,\d+ +@@/,     // @@ -1 +1,2 @@
+          /^@@ +-\d+,\d+ +\+\d+ +@@/,     // @@ -1,2 +1 @@
+          /^@@ +-\d+ +\+\d+ +@@/,         // @@ -1 +1 @@
           /^\*\*\* +\d+,\d+ +\*\*\*\*$/,
           /^--- +\d+,\d+ +----$/
         )
@@ -37,9 +40,7 @@ export default function(hljs) {
             ),
             end: /$/
           },
-          {
-            match: /^\*{15}$/
-          }
+          { match: /^\*{15}$/ }
         ]
       },
       {

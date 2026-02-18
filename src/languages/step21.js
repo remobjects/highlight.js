@@ -3,6 +3,7 @@ Language: STEP Part 21
 Contributors: Adam Joseph Cook <adam.joseph.cook@gmail.com>
 Description: Syntax highlighter for STEP Part 21 files (ISO 10303-21).
 Website: https://en.wikipedia.org/wiki/ISO_10303-21
+Category: syntax
 */
 
 export default function(hljs) {
@@ -42,12 +43,8 @@ export default function(hljs) {
       hljs.C_BLOCK_COMMENT_MODE,
       hljs.COMMENT('/\\*\\*!', '\\*/'),
       hljs.C_NUMBER_MODE,
-      hljs.inherit(hljs.APOS_STRING_MODE, {
-        illegal: null
-      }),
-      hljs.inherit(hljs.QUOTE_STRING_MODE, {
-        illegal: null
-      }),
+      hljs.inherit(hljs.APOS_STRING_MODE, { illegal: null }),
+      hljs.inherit(hljs.QUOTE_STRING_MODE, { illegal: null }),
       {
         className: 'string',
         begin: "'",

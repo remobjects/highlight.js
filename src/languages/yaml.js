@@ -20,18 +20,15 @@ export default function(hljs) {
   const KEY = {
     className: 'attr',
     variants: [
-      {
-        begin: '\\w[\\w :\\/.-]*:(?=[ \t]|$)'
-      },
-      { // double quoted keys
-        begin: '"\\w[\\w :\\/.-]*":(?=[ \t]|$)'
-      },
-      { // single quoted keys
-        begin: '\'\\w[\\w :\\/.-]*\':(?=[ \t]|$)'
-      }
+      // added brackets support and special char support
+      { begin: /[\w*@][\w*@ :()\./-]*:(?=[ \t]|$)/ },
+      { // double quoted keys - with brackets and special char support
+        begin: /"[\w*@][\w*@ :()\./-]*":(?=[ \t]|$)/ },
+      { // single quoted keys - with brackets and special char support
+        begin: /'[\w*@][\w*@ :()\./-]*':(?=[ \t]|$)/ },
     ]
   };
-
+  
   const TEMPLATE_VARIABLES = {
     className: 'template-variable',
     variants: [
@@ -45,21 +42,30 @@ export default function(hljs) {
       }
     ]
   };
+
+  const SINGLE_QUOTE_STRING = {
+    className: 'string',
+    relevance: 0,
+    begin: /'/,
+    end: /'/,
+    contains: [
+      {
+        match: /''/,
+        scope: 'char.escape',
+        relevance: 0
+      }
+    ]
+  };
+
   const STRING = {
     className: 'string',
     relevance: 0,
     variants: [
       {
-        begin: /'/,
-        end: /'/
-      },
-      {
         begin: /"/,
         end: /"/
       },
-      {
-        begin: /\S+/
-      }
+      { begin: /\S+/ }
     ],
     contains: [
       hljs.BACKSLASH_ESCAPE,
@@ -69,21 +75,23 @@ export default function(hljs) {
 
   // Strings inside of value containers (objects) can't contain braces,
   // brackets, or commas
-  const CONTAINER_STRING = hljs.inherit(STRING, {
-    variants: [
-      {
-        begin: /'/,
-        end: /'/
-      },
-      {
-        begin: /"/,
-        end: /"/
-      },
-      {
-        begin: /[^\s,{}[\]]+/
-      }
-    ]
-  });
+  const CONTAINER_STRING = hljs.inherit(STRING, { variants: [
+    {
+      begin: /'/,
+      end: /'/,
+      contains: [
+        {
+          begin: /''/,
+          relevance: 0
+        }
+      ]
+    },
+    {
+      begin: /"/,
+      end: /"/
+    },
+    { begin: /[^\s,{}[\]]+/ }
+  ] });
 
   const DATE_RE = '[0-9]{4}(-[0-9][0-9]){0,2}';
   const TIME_RE = '([Tt \\t][0-9][0-9]?(:[0-9][0-9]){2})?';
@@ -173,9 +181,7 @@ export default function(hljs) {
     hljs.HASH_COMMENT_MODE,
     {
       beginKeywords: LITERALS,
-      keywords: {
-        literal: LITERALS
-      }
+      keywords: { literal: LITERALS }
     },
     TIMESTAMP,
     // numbers are any valid C-style number that
@@ -187,6 +193,7 @@ export default function(hljs) {
     },
     OBJECT,
     ARRAY,
+    SINGLE_QUOTE_STRING,
     STRING
   ];
 

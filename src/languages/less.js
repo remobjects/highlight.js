@@ -67,6 +67,7 @@ export default function(hljs) {
         excludeEnd: true
       }
     },
+    modes.UNICODE_RANGE,
     modes.HEXCOLOR,
     PARENS_MODE,
     IDENT_MODE('variable', '@@?' + IDENT_RE, 10),
@@ -79,7 +80,9 @@ export default function(hljs) {
       returnBegin: true,
       excludeEnd: true
     },
-    modes.IMPORTANT
+    modes.IMPORTANT,
+    { beginKeywords: 'and not' },
+    modes.FUNCTION_DISPATCH
   );
 
   const VALUE_WITH_RULESETS = VALUE_MODES.concat({
@@ -91,11 +94,7 @@ export default function(hljs) {
   const MIXIN_GUARD_MODE = {
     beginKeywords: 'when',
     endsWithParent: true,
-    contains: [
-      {
-        beginKeywords: 'and not'
-      }
-    ].concat(VALUE_MODES) // using this form to override VALUE’s 'function' match
+    contains: [ { beginKeywords: 'and not' } ].concat(VALUE_MODES) // using this form to override VALUE’s 'function' match
   };
 
   /* Rule-Level Modes */
@@ -106,9 +105,7 @@ export default function(hljs) {
     end: /[;}]/,
     relevance: 0,
     contains: [
-      {
-        begin: /-(webkit|moz|ms|o)-/
-      },
+      { begin: /-(webkit|moz|ms|o)-/ },
       modes.CSS_VARIABLE,
       {
         className: 'attribute',
@@ -148,9 +145,7 @@ export default function(hljs) {
         begin: '@' + IDENT_RE + '\\s*:',
         relevance: 15
       },
-      {
-        begin: '@' + IDENT_RE
-      }
+      { begin: '@' + IDENT_RE }
     ],
     starts: {
       end: '[;}]',
@@ -183,6 +178,7 @@ export default function(hljs) {
       MIXIN_GUARD_MODE,
       IDENT_MODE('keyword', 'all\\b'),
       IDENT_MODE('variable', '@\\{' + IDENT_RE + '\\}'), // otherwise it’s identified as tag
+
       {
         begin: '\\b(' + css.TAGS.join('|') + ')\\b',
         className: 'selector-tag'
@@ -207,9 +203,7 @@ export default function(hljs) {
         relevance: 0,
         contains: VALUE_WITH_RULESETS
       }, // argument list of parametric mixins
-      {
-        begin: '!important'
-      }, // eat !important after mixin call or it will be colored as tag
+      { begin: '!important' }, // eat !important after mixin call or it will be colored as tag
       modes.FUNCTION_DISPATCH
     ]
   };
@@ -227,7 +221,9 @@ export default function(hljs) {
     VAR_RULE_MODE,
     PSEUDO_SELECTOR_MODE,
     RULE_MODE,
-    SELECTOR_MODE
+    SELECTOR_MODE,
+    MIXIN_GUARD_MODE,
+    modes.FUNCTION_DISPATCH
   );
 
   return {

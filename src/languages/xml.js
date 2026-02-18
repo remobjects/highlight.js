@@ -8,9 +8,15 @@ Audit: 2020
 /** @type LanguageFn */
 export default function(hljs) {
   const regex = hljs.regex;
-  // Element names can contain letters, digits, hyphens, underscores, and periods
-  const TAG_NAME_RE = regex.concat(/[A-Z_]/, regex.optional(/[A-Z0-9_.-]*:/), /[A-Z0-9_.-]*/);
-  const XML_IDENT_RE = /[A-Za-z0-9._:-]+/;
+  // XML names can have the following additional letters: https://www.w3.org/TR/xml/#NT-NameChar
+  // OTHER_NAME_CHARS = /[:\-.0-9\u00B7\u0300-\u036F\u203F-\u2040]/;
+  // Element names start with NAME_START_CHAR followed by optional other Unicode letters, ASCII digits, hyphens, underscores, and periods
+  // const TAG_NAME_RE = regex.concat(/[A-Z_a-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD]/, regex.optional(/[A-Z_a-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD\-.0-9\u00B7\u0300-\u036F\u203F-\u2040]*:/), /[A-Z_a-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD\-.0-9\u00B7\u0300-\u036F\u203F-\u2040]*/);;
+  // const XML_IDENT_RE = /[A-Z_a-z:\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD\-.0-9\u00B7\u0300-\u036F\u203F-\u2040]+/;
+  // const TAG_NAME_RE = regex.concat(/[A-Z_a-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD]/, regex.optional(/[A-Z_a-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD\-.0-9\u00B7\u0300-\u036F\u203F-\u2040]*:/), /[A-Z_a-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD\-.0-9\u00B7\u0300-\u036F\u203F-\u2040]*/);
+  // however, to cater for performance and more Unicode support rely simply on the Unicode letter class
+  const TAG_NAME_RE = regex.concat(/[\p{L}_]/u, regex.optional(/[\p{L}0-9_.-]*:/u), /[\p{L}0-9_.-]*/u);
+  const XML_IDENT_RE = /[\p{L}0-9._:-]+/u;
   const XML_ENTITIES = {
     className: 'symbol',
     begin: /&[a-z]+;|&#[0-9]+;|&#x[a-f0-9]+;/
@@ -29,12 +35,8 @@ export default function(hljs) {
     begin: /\(/,
     end: /\)/
   });
-  const APOS_META_STRING_MODE = hljs.inherit(hljs.APOS_STRING_MODE, {
-    className: 'string'
-  });
-  const QUOTE_META_STRING_MODE = hljs.inherit(hljs.QUOTE_STRING_MODE, {
-    className: 'string'
-  });
+  const APOS_META_STRING_MODE = hljs.inherit(hljs.APOS_STRING_MODE, { className: 'string' });
+  const QUOTE_META_STRING_MODE = hljs.inherit(hljs.QUOTE_STRING_MODE, { className: 'string' });
   const TAG_INTERNALS = {
     endsWithParent: true,
     illegal: /</,
@@ -63,9 +65,7 @@ export default function(hljs) {
                 end: /'/,
                 contains: [ XML_ENTITIES ]
               },
-              {
-                begin: /[^\s"'=<>`]+/
-              }
+              { begin: /[^\s"'=<>`]+/ }
             ]
           }
         ]
@@ -87,6 +87,7 @@ export default function(hljs) {
       'svg'
     ],
     case_insensitive: true,
+    unicodeRegex: true,
     contains: [
       {
         className: 'meta',
@@ -120,9 +121,7 @@ export default function(hljs) {
       hljs.COMMENT(
         /<!--/,
         /-->/,
-        {
-          relevance: 10
-        }
+        { relevance: 10 }
       ),
       {
         begin: /<!\[CDATA\[/,
@@ -130,11 +129,23 @@ export default function(hljs) {
         relevance: 10
       },
       XML_ENTITIES,
+      // xml processing instructions
       {
         className: 'meta',
-        begin: /<\?xml/,
         end: /\?>/,
-        relevance: 10
+        variants: [
+          {
+            begin: /<\?xml/,
+            relevance: 10,
+            contains: [
+              QUOTE_META_STRING_MODE
+            ]
+          },
+          {
+            begin: /<\?[a-z][a-z0-9]+/,
+          }
+        ]
+
       },
       {
         className: 'tag',
@@ -145,9 +156,7 @@ export default function(hljs) {
         */
         begin: /<style(?=\s|>)/,
         end: />/,
-        keywords: {
-          name: 'style'
-        },
+        keywords: { name: 'style' },
         contains: [ TAG_INTERNALS ],
         starts: {
           end: /<\/style>/,
@@ -163,9 +172,7 @@ export default function(hljs) {
         // See the comment in the <style tag about the lookahead pattern
         begin: /<script(?=\s|>)/,
         end: />/,
-        keywords: {
-          name: 'script'
-        },
+        keywords: { name: 'script' },
         contains: [ TAG_INTERNALS ],
         starts: {
           end: /<\/script>/,

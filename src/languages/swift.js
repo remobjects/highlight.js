@@ -24,9 +24,7 @@ export default function(hljs) {
   const BLOCK_COMMENT = hljs.COMMENT(
     '/\\*',
     '\\*/',
-    {
-      contains: [ 'self' ]
-    }
+    { contains: [ 'self' ] }
   );
   const COMMENTS = [
     hljs.C_LINE_COMMENT_MODE,
@@ -40,9 +38,7 @@ export default function(hljs) {
       /\./,
       either(...Swift.dotKeywords, ...Swift.optionalDotKeywords)
     ],
-    className: {
-      2: "keyword"
-    }
+    className: { 2: "keyword" }
   };
   const KEYWORD_GUARD = {
     // Consume .keyword to prevent highlighting properties and methods as keywords.
@@ -56,14 +52,12 @@ export default function(hljs) {
     .filter(kw => typeof kw !== 'string') // find regex
     .concat(Swift.keywordTypes)
     .map(Swift.keywordWrapper);
-  const KEYWORD = {
-    variants: [
-      {
-        className: 'keyword',
-        match: either(...REGEX_KEYWORDS, ...Swift.optionalDotKeywords)
-      }
-    ]
-  };
+  const KEYWORD = { variants: [
+    {
+      className: 'keyword',
+      match: either(...REGEX_KEYWORDS, ...Swift.optionalDotKeywords)
+    }
+  ] };
   // find all the regular keywords
   const KEYWORDS = {
     $pattern: either(
@@ -105,15 +99,12 @@ export default function(hljs) {
     className: 'operator',
     relevance: 0,
     variants: [
-      {
-        match: Swift.operator
-      },
+      { match: Swift.operator },
       {
         // dot-operator: only operators that start with a dot are allowed to use dots as
         // characters (..., ...<, .*, etc). So there rule here is: a dot followed by one or more
         // characters that may also include dots.
-        match: `\\.(\\.|${Swift.operatorCharacter})+`
-      }
+        match: `\\.(\\.|${Swift.operatorCharacter})+` }
     ]
   };
   const OPERATORS = [
@@ -130,21 +121,13 @@ export default function(hljs) {
     relevance: 0,
     variants: [
       // decimal floating-point-literal (subsumes decimal-literal)
-      {
-        match: `\\b(${decimalDigits})(\\.(${decimalDigits}))?` + `([eE][+-]?(${decimalDigits}))?\\b`
-      },
+      { match: `\\b(${decimalDigits})(\\.(${decimalDigits}))?` + `([eE][+-]?(${decimalDigits}))?\\b` },
       // hexadecimal floating-point-literal (subsumes hexadecimal-literal)
-      {
-        match: `\\b0x(${hexDigits})(\\.(${hexDigits}))?` + `([pP][+-]?(${decimalDigits}))?\\b`
-      },
+      { match: `\\b0x(${hexDigits})(\\.(${hexDigits}))?` + `([pP][+-]?(${decimalDigits}))?\\b` },
       // octal-literal
-      {
-        match: /\b0o([0-7]_*)+\b/
-      },
+      { match: /\b0o([0-7]_*)+\b/ },
       // binary-literal
-      {
-        match: /\b0b([01]_*)+\b/
-      }
+      { match: /\b0b([01]_*)+\b/ }
     ]
   };
 
@@ -152,12 +135,8 @@ export default function(hljs) {
   const ESCAPED_CHARACTER = (rawDelimiter = "") => ({
     className: 'subst',
     variants: [
-      {
-        match: concat(/\\/, rawDelimiter, /[0\\tnr"']/)
-      },
-      {
-        match: concat(/\\/, rawDelimiter, /u\{[0-9a-fA-F]{1,8}\}/)
-      }
+      { match: concat(/\\/, rawDelimiter, /[0\\tnr"']/) },
+      { match: concat(/\\/, rawDelimiter, /u\{[0-9a-fA-F]{1,8}\}/) }
     ]
   });
   const ESCAPED_NEWLINE = (rawDelimiter = "") => ({
@@ -201,10 +180,52 @@ export default function(hljs) {
     ]
   };
 
-  // https://docs.swift.org/swift-book/ReferenceManual/LexicalStructure.html#ID412
-  const QUOTED_IDENTIFIER = {
-    match: concat(/`/, Swift.identifier, /`/)
+  const REGEXP_CONTENTS = [
+    hljs.BACKSLASH_ESCAPE,
+    {
+      begin: /\[/,
+      end: /\]/,
+      relevance: 0,
+      contains: [ hljs.BACKSLASH_ESCAPE ]
+    }
+  ];
+
+  const BARE_REGEXP_LITERAL = {
+    begin: /\/[^\s](?=[^/\n]*\/)/,
+    end: /\//,
+    contains: REGEXP_CONTENTS
   };
+
+  const EXTENDED_REGEXP_LITERAL = (rawDelimiter) => {
+    const begin = concat(rawDelimiter, /\//);
+    const end = concat(/\//, rawDelimiter);
+    return {
+      begin,
+      end,
+      contains: [
+        ...REGEXP_CONTENTS,
+        {
+          scope: "comment",
+          begin: `#(?!.*${end})`,
+          end: /$/,
+        },
+      ],
+    };
+  };
+
+  // https://docs.swift.org/swift-book/documentation/the-swift-programming-language/lexicalstructure/#Regular-Expression-Literals
+  const REGEXP = {
+    scope: "regexp",
+    variants: [
+      EXTENDED_REGEXP_LITERAL('###'),
+      EXTENDED_REGEXP_LITERAL('##'),
+      EXTENDED_REGEXP_LITERAL('#'),
+      BARE_REGEXP_LITERAL
+    ]
+  };
+
+  // https://docs.swift.org/swift-book/ReferenceManual/LexicalStructure.html#ID412
+  const QUOTED_IDENTIFIER = { match: concat(/`/, Swift.identifier, /`/) };
   const IMPLICIT_PARAMETER = {
     className: 'variable',
     match: /\$\d+/
@@ -222,30 +243,31 @@ export default function(hljs) {
   // https://docs.swift.org/swift-book/ReferenceManual/Attributes.html
   const AVAILABLE_ATTRIBUTE = {
     match: /(@|#(un)?)available/,
-    className: "keyword",
-    starts: {
-      contains: [
-        {
-          begin: /\(/,
-          end: /\)/,
-          keywords: Swift.availabilityKeywords,
-          contains: [
-            ...OPERATORS,
-            NUMBER,
-            STRING
-          ]
-        }
-      ]
-    }
+    scope: 'keyword',
+    starts: { contains: [
+      {
+        begin: /\(/,
+        end: /\)/,
+        keywords: Swift.availabilityKeywords,
+        contains: [
+          ...OPERATORS,
+          NUMBER,
+          STRING
+        ]
+      }
+    ] }
   };
+
   const KEYWORD_ATTRIBUTE = {
-    className: 'keyword',
-    match: concat(/@/, either(...Swift.keywordAttributes))
+    scope: 'keyword',
+    match: concat(/@/, either(...Swift.keywordAttributes), lookahead(either(/\(/, /\s+/))),
   };
+
   const USER_DEFINED_ATTRIBUTE = {
-    className: 'meta',
+    scope: 'meta',
     match: concat(/@/, Swift.identifier)
   };
+
   const ATTRIBUTES = [
     AVAILABLE_ATTRIBUTE,
     KEYWORD_ATTRIBUTE,
@@ -311,6 +333,7 @@ export default function(hljs) {
       'self',
       TUPLE_ELEMENT_NAME,
       ...COMMENTS,
+      REGEXP,
       ...KEYWORD_MODES,
       ...BUILT_INS,
       ...OPERATORS,
@@ -325,6 +348,7 @@ export default function(hljs) {
   const GENERIC_PARAMETERS = {
     begin: /</,
     end: />/,
+    keywords: 'repeat each',
     contains: [
       ...COMMENTS,
       TYPE
@@ -367,9 +391,10 @@ export default function(hljs) {
     illegal: /["']/
   };
   // https://docs.swift.org/swift-book/ReferenceManual/Declarations.html#ID362
-  const FUNCTION = {
+  // https://docs.swift.org/swift-book/documentation/the-swift-programming-language/declarations/#Macro-Declaration
+  const FUNCTION_OR_MACRO = {
     match: [
-      /func/,
+      /(func|macro)/,
       /\s+/,
       either(QUOTED_IDENTIFIER.match, Swift.identifier, Swift.operator)
     ],
@@ -395,9 +420,7 @@ export default function(hljs) {
       /\b(?:subscript|init[?!]?)/,
       /\s*(?=[<(])/,
     ],
-    className: {
-      1: "keyword"
-    },
+    className: { 1: "keyword" },
     contains: [
       GENERIC_PARAMETERS,
       FUNCTION_PARAMETERS,
@@ -437,6 +460,64 @@ export default function(hljs) {
     end: /}/
   };
 
+  const CLASS_FUNC_DECLARATION = {
+    match: [
+      /class\b/,          
+      /\s+/,
+      /func\b/,
+      /\s+/,
+      /\b[A-Za-z_][A-Za-z0-9_]*\b/ 
+    ],
+    scope: {
+      1: "keyword",
+      3: "keyword",
+      5: "title.function"
+    }
+  };
+
+  const CLASS_VAR_DECLARATION = {
+    match: [
+      /class\b/,
+      /\s+/,          
+      /var\b/, 
+    ],
+    scope: {
+      1: "keyword",
+      3: "keyword"
+    }
+  };
+
+  const TYPE_DECLARATION = {
+    begin: [
+      /(struct|protocol|class|extension|enum|actor)/,
+      /\s+/,
+      Swift.identifier,
+      /\s*/,
+    ],
+    beginScope: {
+      1: "keyword",
+      3: "title.class"
+    },
+    keywords: KEYWORDS,
+    contains: [
+      GENERIC_PARAMETERS,
+      ...KEYWORD_MODES,
+      {
+        begin: /:/,
+        end: /\{/,
+        keywords: KEYWORDS,
+        contains: [
+          {
+            scope: "title.class.inherited",
+            match: Swift.typeIdentifier,
+          },
+          ...KEYWORD_MODES,
+        ],
+        relevance: 0,
+      },
+    ]
+  };
+
   // Add supported submodes to string interpolation.
   for (const variant of STRING.variants) {
     const interpolation = variant.contains.find(mode => mode.label === "interpol");
@@ -469,21 +550,11 @@ export default function(hljs) {
     keywords: KEYWORDS,
     contains: [
       ...COMMENTS,
-      FUNCTION,
+      FUNCTION_OR_MACRO,
       INIT_SUBSCRIPT,
-      {
-        beginKeywords: 'struct protocol class extension enum actor',
-        end: '\\{',
-        excludeEnd: true,
-        keywords: KEYWORDS,
-        contains: [
-          hljs.inherit(hljs.TITLE_MODE, {
-            className: "title.class",
-            begin: /[A-Za-z$_][\u00C0-\u02B80-9A-Za-z$_]*/
-          }),
-          ...KEYWORD_MODES
-        ]
-      },
+      CLASS_FUNC_DECLARATION,
+      CLASS_VAR_DECLARATION,
+      TYPE_DECLARATION,
       OPERATOR_DECLARATION,
       PRECEDENCEGROUP,
       {
@@ -492,6 +563,7 @@ export default function(hljs) {
         contains: [ ...COMMENTS ],
         relevance: 0
       },
+      REGEXP,
       ...KEYWORD_MODES,
       ...BUILT_INS,
       ...OPERATORS,

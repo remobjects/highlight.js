@@ -22,15 +22,20 @@ export default function(hljs) {
   const PASCAL_CASE_CLASS_NAME_RE = regex.concat(
     /(\\?[A-Z][a-z0-9_\x7f-\xff]+|\\?[A-Z]+(?=[A-Z][a-z0-9_\x7f-\xff])){1,}/,
     NOT_PERL_ETC);
+  const UPCASE_NAME_RE = regex.concat(
+    /[A-Z]+/,
+    NOT_PERL_ETC);
   const VARIABLE = {
     scope: 'variable',
     match: '\\$+' + IDENT_RE,
   };
   const PREPROCESSOR = {
-    scope: 'meta',
+    scope: "meta",
     variants: [
       { begin: /<\?php/, relevance: 10 }, // boost for obvious PHP
-      { begin: /<\?[=]?/ },
+      { begin: /<\?=/ },
+      // less relevant per PSR-1 which says not to use short-tags
+      { begin: /<\?/, relevance: 0.1 },
       { begin: /\?>/ } // end php tag
     ]
   };
@@ -38,20 +43,29 @@ export default function(hljs) {
     scope: 'subst',
     variants: [
       { begin: /\$\w+/ },
-      { begin: /\{\$/, end: /\}/ }
+      {
+        begin: /\{\$/,
+        end: /\}/
+      }
     ]
   };
-  const SINGLE_QUOTED = hljs.inherit(hljs.APOS_STRING_MODE, {
-    illegal: null,
-  });
+  const SINGLE_QUOTED = hljs.inherit(hljs.APOS_STRING_MODE, { illegal: null, });
   const DOUBLE_QUOTED = hljs.inherit(hljs.QUOTE_STRING_MODE, {
     illegal: null,
     contains: hljs.QUOTE_STRING_MODE.contains.concat(SUBST),
   });
-  const HEREDOC = hljs.END_SAME_AS_BEGIN({
-    begin: /<<<[ \t]*(\w+)\n/,
+
+  const HEREDOC = {
+    begin: /<<<[ \t]*(?:(\w+)|"(\w+)")\n/,
     end: /[ \t]*(\w+)\b/,
     contains: hljs.QUOTE_STRING_MODE.contains.concat(SUBST),
+    'on:begin': (m, resp) => { resp.data._beginMatch = m[1] || m[2]; },
+    'on:end': (m, resp) => { if (resp.data._beginMatch !== m[1]) resp.ignoreMatch(); },
+  };
+
+  const NOWDOC = hljs.END_SAME_AS_BEGIN({
+    begin: /<<<[ \t]*'(\w+)'\n/,
+    end: /[ \t]*(\w+)\b/,
   });
   // list of valid whitespaces because non-breaking space might be part of a IDENT_RE
   const WHITESPACE = '[ \t\n]';
@@ -60,7 +74,8 @@ export default function(hljs) {
     variants: [
       DOUBLE_QUOTED,
       SINGLE_QUOTED,
-      HEREDOC
+      HEREDOC,
+      NOWDOC
     ]
   };
   const NUMBER = {
@@ -312,88 +327,78 @@ export default function(hljs) {
     });
   };
 
-  const CONSTRUCTOR_CALL = {
-    variants: [
-      {
-        match: [
-          /new/,
-          regex.concat(WHITESPACE, "+"),
-          // to prevent built ins from being confused as the class constructor call
-          regex.concat("(?!", normalizeKeywords(BUILT_INS).join("\\b|"), "\\b)"),
-          PASCAL_CASE_CLASS_NAME_RE,
-        ],
-        scope: {
-          1: "keyword",
-          4: "title.class",
-        },
-      }
-    ]
-  };
+  const CONSTRUCTOR_CALL = { variants: [
+    {
+      match: [
+        /new/,
+        regex.concat(WHITESPACE, "+"),
+        // to prevent built ins from being confused as the class constructor call
+        regex.concat("(?!", normalizeKeywords(BUILT_INS).join("\\b|"), "\\b)"),
+        PASCAL_CASE_CLASS_NAME_RE,
+      ],
+      scope: {
+        1: "keyword",
+        4: "title.class",
+      },
+    }
+  ] };
 
   const CONSTANT_REFERENCE = regex.concat(IDENT_RE, "\\b(?!\\()");
 
-  const LEFT_AND_RIGHT_SIDE_OF_DOUBLE_COLON = {
-    variants: [
-      {
-        match: [
-          regex.concat(
-            /::/,
-            regex.lookahead(/(?!class\b)/)
-          ),
-          CONSTANT_REFERENCE,
-        ],
-        scope: {
-          2: "variable.constant",
-        },
-      },
-      {
-        match: [
+  const LEFT_AND_RIGHT_SIDE_OF_DOUBLE_COLON = { variants: [
+    {
+      match: [
+        regex.concat(
           /::/,
-          /class/,
-        ],
-        scope: {
-          2: "variable.language",
-        },
-      },
-      {
-        match: [
-          PASCAL_CASE_CLASS_NAME_RE,
-          regex.concat(
-            /::/,
-            regex.lookahead(/(?!class\b)/)
-          ),
-          CONSTANT_REFERENCE,
-        ],
-        scope: {
-          1: "title.class",
-          3: "variable.constant",
-        },
-      },
-      {
-        match: [
-          PASCAL_CASE_CLASS_NAME_RE,
-          regex.concat(
-            "::",
-            regex.lookahead(/(?!class\b)/)
-          ),
-        ],
-        scope: {
-          1: "title.class",
-        },
-      },
-      {
-        match: [
-          PASCAL_CASE_CLASS_NAME_RE,
+          regex.lookahead(/(?!class\b)/)
+        ),
+        CONSTANT_REFERENCE,
+      ],
+      scope: { 2: "variable.constant", },
+    },
+    {
+      match: [
+        /::/,
+        /class/,
+      ],
+      scope: { 2: "variable.language", },
+    },
+    {
+      match: [
+        PASCAL_CASE_CLASS_NAME_RE,
+        regex.concat(
           /::/,
-          /class/,
-        ],
-        scope: {
-          1: "title.class",
-          3: "variable.language",
-        },
-      }
-    ]
-  };
+          regex.lookahead(/(?!class\b)/)
+        ),
+        CONSTANT_REFERENCE,
+      ],
+      scope: {
+        1: "title.class",
+        3: "variable.constant",
+      },
+    },
+    {
+      match: [
+        PASCAL_CASE_CLASS_NAME_RE,
+        regex.concat(
+          "::",
+          regex.lookahead(/(?!class\b)/)
+        ),
+      ],
+      scope: { 1: "title.class", },
+    },
+    {
+      match: [
+        PASCAL_CASE_CLASS_NAME_RE,
+        /::/,
+        /class/,
+      ],
+      scope: {
+        1: "title.class",
+        3: "variable.language",
+      },
+    }
+  ] };
 
   const NAMED_ARGUMENT = {
     scope: 'attr',
@@ -409,6 +414,8 @@ export default function(hljs) {
       VARIABLE,
       LEFT_AND_RIGHT_SIDE_OF_DOUBLE_COLON,
       hljs.C_BLOCK_COMMENT_MODE,
+      hljs.C_LINE_COMMENT_MODE,
+      hljs.HASH_COMMENT_MODE,
       STRING,
       NUMBER,
       CONSTRUCTOR_CALL,
@@ -424,12 +431,8 @@ export default function(hljs) {
       regex.concat(WHITESPACE, "*"),
       regex.lookahead(/(?=\()/)
     ],
-    scope: {
-      3: "title.function.invoke",
-    },
-    contains: [
-      PARAMS_MODE
-    ]
+    scope: { 3: "title.function.invoke", },
+    contains: [ PARAMS_MODE ]
   };
   PARAMS_MODE.contains.push(FUNCTION_INVOKE);
 
@@ -437,13 +440,20 @@ export default function(hljs) {
     NAMED_ARGUMENT,
     LEFT_AND_RIGHT_SIDE_OF_DOUBLE_COLON,
     hljs.C_BLOCK_COMMENT_MODE,
+    hljs.C_LINE_COMMENT_MODE,
+    hljs.HASH_COMMENT_MODE,
     STRING,
     NUMBER,
     CONSTRUCTOR_CALL,
   ];
 
   const ATTRIBUTES = {
-    begin: regex.concat(/#\[\s*/, PASCAL_CASE_CLASS_NAME_RE),
+    begin: regex.concat(/#\[\s*\\?/,
+      regex.either(
+        PASCAL_CASE_CLASS_NAME_RE,
+        UPCASE_NAME_RE
+      )
+    ),
     beginScope: "meta",
     end: /]/,
     endScope: "meta",
@@ -473,7 +483,10 @@ export default function(hljs) {
       ...ATTRIBUTE_CONTAINS,
       {
         scope: 'meta',
-        match: PASCAL_CASE_CLASS_NAME_RE
+        variants: [
+          { match: PASCAL_CASE_CLASS_NAME_RE },
+          { match: UPCASE_NAME_RE }
+        ]
       }
     ]
   };
@@ -488,14 +501,12 @@ export default function(hljs) {
       hljs.COMMENT(
         '/\\*',
         '\\*/',
-        {
-          contains: [
-            {
-              scope: 'doctag',
-              match: '@[A-Za-z]+'
-            }
-          ]
-        }
+        { contains: [
+          {
+            scope: 'doctag',
+            match: '@[A-Za-z]+'
+          }
+        ] }
       ),
       {
         match: /__halt_compiler\(\);/,
@@ -535,12 +546,12 @@ export default function(hljs) {
       {
         scope: 'function',
         relevance: 0,
-        beginKeywords: 'fn function', end: /[;{]/, excludeEnd: true,
+        beginKeywords: 'fn function',
+        end: /[;{]/,
+        excludeEnd: true,
         illegal: '[$%\\[]',
         contains: [
-          {
-            beginKeywords: 'use',
-          },
+          { beginKeywords: 'use', },
           hljs.UNDERSCORE_TITLE_MODE,
           {
             begin: '=>', // No markup, just a relevance booster
@@ -548,15 +559,19 @@ export default function(hljs) {
           },
           {
             scope: 'params',
-            begin: '\\(', end: '\\)',
+            begin: '\\(',
+            end: '\\)',
             excludeBegin: true,
             excludeEnd: true,
             keywords: KEYWORDS,
             contains: [
               'self',
+              ATTRIBUTES,
               VARIABLE,
               LEFT_AND_RIGHT_SIDE_OF_DOUBLE_COLON,
               hljs.C_BLOCK_COMMENT_MODE,
+              hljs.C_LINE_COMMENT_MODE,
+              hljs.HASH_COMMENT_MODE,
               STRING,
               NUMBER
             ]
@@ -566,14 +581,20 @@ export default function(hljs) {
       {
         scope: 'class',
         variants: [
-          { beginKeywords: "enum", illegal: /[($"]/ },
-          { beginKeywords: "class interface trait", illegal: /[:($"]/ }
+          {
+            beginKeywords: "enum",
+            illegal: /[($"]/
+          },
+          {
+            beginKeywords: "class interface trait",
+            illegal: /[:($"]/
+          }
         ],
         relevance: 0,
         end: /\{/,
         excludeEnd: true,
         contains: [
-          {beginKeywords: 'extends implements'},
+          { beginKeywords: 'extends implements' },
           hljs.UNDERSCORE_TITLE_MODE
         ]
       },
@@ -585,9 +606,7 @@ export default function(hljs) {
         relevance: 0,
         end: ';',
         illegal: /[.']/,
-        contains: [
-          hljs.inherit(hljs.UNDERSCORE_TITLE_MODE, { scope: "title.class" })
-        ]
+        contains: [ hljs.inherit(hljs.UNDERSCORE_TITLE_MODE, { scope: "title.class" }) ]
       },
       {
         beginKeywords: 'use',

@@ -3,6 +3,7 @@ Language: Smalltalk
 Description: Smalltalk is an object-oriented, dynamically typed reflective programming language.
 Author: Vladimir Gubarkov <xonixx@gmail.com>
 Website: https://en.wikipedia.org/wiki/Smalltalk
+Category: system
 */
 
 export default function(hljs) {
@@ -49,9 +50,7 @@ export default function(hljs) {
         returnBegin: true,
         end: /\|/,
         illegal: /\S/,
-        contains: [ {
-          begin: '(\\|[ ]*)?' + VAR_IDENT_RE
-        } ]
+        contains: [ { begin: '(\\|[ ]*)?' + VAR_IDENT_RE } ]
       },
       {
         begin: '#\\(',

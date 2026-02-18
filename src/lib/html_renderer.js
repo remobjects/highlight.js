@@ -8,7 +8,7 @@ import { escapeHTML } from './utils.js';
  * @property {() => string} value
  */
 
-/** @typedef {{kind?: string, sublanguage?: boolean}} Node */
+/** @typedef {{scope?: string, language?: string, sublanguage?: boolean}} Node */
 /** @typedef {{walk: (r: Renderer) => void}} Tree */
 /** */
 
@@ -19,7 +19,9 @@ const SPAN_CLOSE = '</span>';
  *
  * @param {Node} node */
 const emitsWrappingTags = (node) => {
-  return !!node.kind;
+  // rarely we can have a sublanguage where language is undefined
+  // TODO: track down why
+  return !!node.scope;
 };
 
 /**
@@ -27,7 +29,12 @@ const emitsWrappingTags = (node) => {
  * @param {string} name
  * @param {{prefix:string}} options
  */
-const expandScopeName = (name, { prefix }) => {
+const scopeToCSSClass = (name, { prefix }) => {
+  // sub-language
+  if (name.startsWith("language:")) {
+    return name.replace("language:", "language-");
+  }
+  // tiered scope: comment.line
   if (name.includes(".")) {
     const pieces = name.split(".");
     return [
@@ -35,6 +42,7 @@ const expandScopeName = (name, { prefix }) => {
       ...(pieces.map((x, i) => `${x}${"_".repeat(i + 1)}`))
     ].join(" ");
   }
+  // simple scope
   return `${prefix}${name}`;
 };
 
@@ -67,13 +75,9 @@ export default class HTMLRenderer {
   openNode(node) {
     if (!emitsWrappingTags(node)) return;
 
-    let scope = node.kind;
-    if (node.sublanguage) {
-      scope = `language-${scope}`;
-    } else {
-      scope = expandScopeName(scope, { prefix: this.classPrefix });
-    }
-    this.span(scope);
+    const className = scopeToCSSClass(node.scope,
+      { prefix: this.classPrefix });
+    this.span(className);
   }
 
   /**

@@ -7,15 +7,22 @@ Category: common, system
 */
 
 /** @type LanguageFn */
+
 export default function(hljs) {
   const regex = hljs.regex;
+  // ============================================
+  // Added to support the r# keyword, which is a raw identifier in Rust.
+  const RAW_IDENTIFIER = /(r#)?/;
+  const UNDERSCORE_IDENT_RE = regex.concat(RAW_IDENTIFIER, hljs.UNDERSCORE_IDENT_RE);
+  const IDENT_RE = regex.concat(RAW_IDENTIFIER, hljs.IDENT_RE);
+  // ============================================
   const FUNCTION_INVOKE = {
     className: "title.function.invoke",
     relevance: 0,
     begin: regex.concat(
       /\b/,
-      /(?!let\b)/,
-      hljs.IDENT_RE,
+      /(?!let|for|while|if|else|match\b)/,
+      IDENT_RE,
       regex.lookahead(/\s*\(/))
   };
   const NUMBER_SUFFIX = '([ui](8|16|32|64|128|size)|f(32|64))\?';
@@ -64,6 +71,7 @@ export default function(hljs) {
     "try",
     "type",
     "typeof",
+    "union",
     "unsafe",
     "unsized",
     "use",
@@ -123,11 +131,12 @@ export default function(hljs) {
     "debug_assert!",
     "debug_assert_eq!",
     "env!",
+    "eprintln!",
     "panic!",
     "file!",
     "format!",
     "format_args!",
-    "include_bin!",
+    "include_bytes!",
     "include_str!",
     "line!",
     "local_data_key!",
@@ -184,44 +193,40 @@ export default function(hljs) {
     illegal: '</',
     contains: [
       hljs.C_LINE_COMMENT_MODE,
-      hljs.COMMENT('/\\*', '\\*/', {
-        contains: [ 'self' ]
-      }),
+      hljs.COMMENT('/\\*', '\\*/', { contains: [ 'self' ] }),
       hljs.inherit(hljs.QUOTE_STRING_MODE, {
         begin: /b?"/,
         illegal: null
       }),
       {
-        className: 'string',
+        className: 'symbol',
+        // negative lookahead to avoid matching `'`
+        begin: /'[a-zA-Z_][a-zA-Z0-9_]*(?!')/
+      },
+      {
+        scope: 'string',
         variants: [
+          { begin: /b?r(#*)"(.|\n)*?"\1(?!#)/ },
           {
-            begin: /b?r(#*)"(.|\n)*?"\1(?!#)/
-          },
-          {
-            begin: /b?'\\?(x\w{2}|u\w{4}|U\w{8}|.)'/
+            begin: /b?'/,
+            end: /'/,
+            contains: [
+              {
+                scope: "char.escape",
+                match: /\\('|\w|x\w{2}|u\w{4}|U\w{8})/
+              }
+            ]
           }
         ]
       },
       {
-        className: 'symbol',
-        begin: /'[a-zA-Z_][a-zA-Z0-9_]*/
-      },
-      {
         className: 'number',
         variants: [
-          {
-            begin: '\\b0b([01_]+)' + NUMBER_SUFFIX
-          },
-          {
-            begin: '\\b0o([0-7_]+)' + NUMBER_SUFFIX
-          },
-          {
-            begin: '\\b0x([A-Fa-f0-9_]+)' + NUMBER_SUFFIX
-          },
-          {
-            begin: '\\b(\\d[\\d_]*(\\.[0-9_]+)?([eE][+-]?[0-9_]+)?)' +
-                   NUMBER_SUFFIX
-          }
+          { begin: '\\b0b([01_]+)' + NUMBER_SUFFIX },
+          { begin: '\\b0o([0-7_]+)' + NUMBER_SUFFIX },
+          { begin: '\\b0x([A-Fa-f0-9_]+)' + NUMBER_SUFFIX },
+          { begin: '\\b(\\d[\\d_]*(\\.[0-9_]+)?([eE][+-]?[0-9_]+)?)'
+                   + NUMBER_SUFFIX }
         ],
         relevance: 0
       },
@@ -229,7 +234,7 @@ export default function(hljs) {
         begin: [
           /fn/,
           /\s+/,
-          hljs.UNDERSCORE_IDENT_RE
+          UNDERSCORE_IDENT_RE
         ],
         className: {
           1: "keyword",
@@ -244,15 +249,19 @@ export default function(hljs) {
           {
             className: 'string',
             begin: /"/,
-            end: /"/
+            end: /"/,
+            contains: [
+              hljs.BACKSLASH_ESCAPE
+            ]
           }
         ]
       },
       {
         begin: [
-          /let/, /\s+/,
+          /let/,
+          /\s+/,
           /(?:mut\s+)?/,
-          hljs.UNDERSCORE_IDENT_RE
+          UNDERSCORE_IDENT_RE
         ],
         className: {
           1: "keyword",
@@ -265,7 +274,7 @@ export default function(hljs) {
         begin: [
           /for/,
           /\s+/,
-          hljs.UNDERSCORE_IDENT_RE,
+          UNDERSCORE_IDENT_RE,
           /\s+/,
           /in/
         ],
@@ -279,7 +288,7 @@ export default function(hljs) {
         begin: [
           /type/,
           /\s+/,
-          hljs.UNDERSCORE_IDENT_RE
+          UNDERSCORE_IDENT_RE
         ],
         className: {
           1: "keyword",
@@ -290,7 +299,7 @@ export default function(hljs) {
         begin: [
           /(?:trait|enum|struct|union|impl|for)/,
           /\s+/,
-          hljs.UNDERSCORE_IDENT_RE
+          UNDERSCORE_IDENT_RE
         ],
         className: {
           1: "keyword",
@@ -301,7 +310,8 @@ export default function(hljs) {
         begin: hljs.IDENT_RE + '::',
         keywords: {
           keyword: "Self",
-          built_in: BUILTINS
+          built_in: BUILTINS,
+          type: TYPES
         }
       },
       {

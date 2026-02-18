@@ -3,6 +3,7 @@ Language: AspectJ
 Author: Hakan Ozler <ozler.hakan@gmail.com>
 Website: https://www.eclipse.org/aspectj/
 Description: Syntax Highlighting for the AspectJ Language which is a general-purpose aspect-oriented extension to the Java programming language.
+Category: system
 Audit: 2020
 */
 
@@ -126,9 +127,7 @@ export default function(hljs) {
         excludeEnd: true,
         illegal: /[:;"\[\]]/,
         contains: [
-          {
-            beginKeywords: 'extends implements pertypewithin perthis pertarget percflowbelow percflow issingleton'
-          },
+          { beginKeywords: 'extends implements pertypewithin perthis pertarget percflowbelow percflow issingleton' },
           hljs.UNDERSCORE_TITLE_MODE,
           {
             begin: /\([^\)]*/,
@@ -147,9 +146,7 @@ export default function(hljs) {
         keywords: 'class interface',
         illegal: /[:"\[\]]/,
         contains: [
-          {
-            beginKeywords: 'extends implements'
-          },
+          { beginKeywords: 'extends implements' },
           hljs.UNDERSCORE_TITLE_MODE
         ]
       },

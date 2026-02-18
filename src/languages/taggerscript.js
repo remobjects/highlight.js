@@ -3,21 +3,24 @@ Language: Tagger Script
 Author: Philipp Wolfer <ph.wolfer@gmail.com>
 Description: Syntax Highlighting for the Tagger Script as used by MusicBrainz Picard.
 Website: https://picard.musicbrainz.org
+Category: scripting
  */
 export default function(hljs) {
   const NOOP = {
     className: 'comment',
     begin: /\$noop\(/,
     end: /\)/,
-    contains: [{
-      begin: /\\[()]/
-    }, {
-      begin: /\(/,
-      end: /\)/,
-      contains: [{
-        begin: /\\[()]/
-      }, 'self']
-    } ],
+    contains: [
+      { begin: /\\[()]/ },
+      {
+        begin: /\(/,
+        end: /\)/,
+        contains: [
+          { begin: /\\[()]/ },
+          'self'
+        ]
+      }
+    ],
     relevance: 10
   };
 

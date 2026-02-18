@@ -4,6 +4,7 @@ Author: Jon Evans <jon@craftyjon.com>
 Contributors: Boone Severson <boone.severson@gmail.com>
 Description: Verilog is a hardware description language used in electronic design automation to describe digital and mixed-signal systems. This highlighter supports Verilog and SystemVerilog through IEEE 1800-2012.
 Website: http://www.verilog.com
+Category: hardware
 */
 
 export default function(hljs) {
@@ -512,12 +513,8 @@ export default function(hljs) {
         scope: 'number',
         contains: [ hljs.BACKSLASH_ESCAPE ],
         variants: [
-          {
-            begin: /\b((\d+'([bhodBHOD]))[0-9xzXZa-fA-F_]+)/
-          },
-          {
-            begin: /\B(('([bhodBHOD]))[0-9xzXZa-fA-F_]+)/
-          },
+          { begin: /\b((\d+'([bhodBHOD]))[0-9xzXZa-fA-F_]+)/ },
+          { begin: /\B(('([bhodBHOD]))[0-9xzXZa-fA-F_]+)/ },
           { // decimal
             begin: /\b[0-9][0-9_]*/,
             relevance: 0
@@ -528,9 +525,7 @@ export default function(hljs) {
       {
         scope: 'variable',
         variants: [
-          {
-            begin: '#\\((?!parameter).+\\)'
-          },
+          { begin: '#\\((?!parameter).+\\)' },
           {
             begin: '\\.\\w+',
             relevance: 0

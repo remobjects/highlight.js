@@ -17,9 +17,7 @@ export default function(hljs) {
   const SUBST = {
     className: 'subst',
     variants: [
-      {
-        begin: '\\$[A-Za-z0-9_]+'
-      },
+      { begin: '\\$[A-Za-z0-9_]+' },
       {
         begin: /\$\{/,
         end: /\}/
@@ -90,7 +88,11 @@ export default function(hljs) {
         excludeBegin: true,
         excludeEnd: true,
         relevance: 0,
-        contains: [ TYPE ]
+        contains: [ 
+          TYPE, 
+          hljs.C_LINE_COMMENT_MODE, 
+          hljs.C_BLOCK_COMMENT_MODE, 
+        ]
       },
       {
         className: 'params',
@@ -99,7 +101,11 @@ export default function(hljs) {
         excludeBegin: true,
         excludeEnd: true,
         relevance: 0,
-        contains: [ TYPE ]
+        contains: [ 
+          TYPE, 
+          hljs.C_LINE_COMMENT_MODE, 
+          hljs.C_BLOCK_COMMENT_MODE, 
+        ]
       },
       NAME
     ]
@@ -118,12 +124,10 @@ export default function(hljs) {
       'extension',
       /\s+(?=[[(])/, // followed by at least one space and `[` or `(`
     ],
-    beginScope: {
-      2: "keyword",
-    }
+    beginScope: { 2: "keyword", }
   };
 
-  const END = [{
+  const END = {
     begin: [
       /^\s*/, // Is first token on the line
       /end/,
@@ -134,17 +138,17 @@ export default function(hljs) {
       2: "keyword",
       4: "keyword",
     }
-  }];
+  };
 
   // TODO: use negative look-behind in future
   //       /(?<!\.)\binline(?=\s)/
-  const INLINE_MODES = [{
-    match: /\.inline\b/
-  },
-  {
-    begin: /\binline(?=\s)/,
-    keywords: 'inline'
-  }];
+  const INLINE_MODES = [
+    { match: /\.inline\b/ },
+    {
+      begin: /\binline(?=\s)/,
+      keywords: 'inline'
+    }
+  ];
 
   const USING_PARAM_CLAUSE = {
     begin: [
@@ -152,18 +156,45 @@ export default function(hljs) {
       /using/,
       /\s+(?!\))/, // Spaces not followed by `)`
     ],
-    beginScope: {
-      2: "keyword",
-    }
+    beginScope: { 2: "keyword", }
   };
+
+  // glob all non-whitespace characters as a "string"
+  // sourced from https://github.com/scala/docs.scala-lang/pull/2845
+  const DIRECTIVE_VALUE = {
+    className: 'string',
+    begin: /\S+/,
+  }
+
+  // directives
+  // sourced from https://github.com/scala/docs.scala-lang/pull/2845
+  const USING_DIRECTIVE = {
+    begin: [
+      '//>',
+      /\s+/,
+      /using/,
+      /\s+/,
+      /\S+/
+    ],
+    beginScope: {
+      1: "comment",
+      3: "keyword",
+      5: "type"
+    },
+    end: /$/,
+    contains: [
+      DIRECTIVE_VALUE,
+    ]
+  }
 
   return {
     name: 'Scala',
     keywords: {
       literal: 'true false null',
-      keyword: 'type yield lazy override def with val var sealed abstract private trait object if then forSome for while do throw finally protected extends import final return else break new catch super class case package default try this match continue throws implicit export enum given'
+      keyword: 'type yield lazy override def with val var sealed abstract private trait object if then forSome for while do throw finally protected extends import final return else break new catch super class case package default try this match continue throws implicit export enum given transparent'
     },
     contains: [
+      USING_DIRECTIVE,
       hljs.C_LINE_COMMENT_MODE,
       hljs.C_BLOCK_COMMENT_MODE,
       STRING,

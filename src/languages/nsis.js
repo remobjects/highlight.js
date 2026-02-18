@@ -3,6 +3,7 @@ Language: NSIS
 Description: Nullsoft Scriptable Install System
 Author: Jan T. Sott <jan.sott@gmail.com>
 Website: https://nsis.sourceforge.io/Main_Page
+Category: scripting
 */
 
 import * as regex from '../lib/regex.js';
@@ -114,6 +115,7 @@ export default function(hljs) {
     "addincludedir",
     "addplugindir",
     "appendfile",
+    "assert",
     "cd",
     "define",
     "delfile",
@@ -536,15 +538,11 @@ export default function(hljs) {
       hljs.COMMENT(
         ';',
         '$',
-        {
-          relevance: 0
-        }
+        { relevance: 0 }
       ),
       VARIABLE_DEFINITION,
       FUNCTION_DEFINITION,
-      {
-        beginKeywords: 'Function PageEx Section SectionGroup FunctionEnd SectionEnd',
-      },
+      { beginKeywords: 'Function PageEx Section SectionGroup FunctionEnd SectionEnd', },
       STRING,
       COMPILER,
       DEFINES,

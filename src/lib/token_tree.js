@@ -1,14 +1,22 @@
 import HTMLRenderer from './html_renderer.js';
 
-/** @typedef {{kind?: string, sublanguage?: boolean, children: Node[]} | string} Node */
-/** @typedef {{kind?: string, sublanguage?: boolean, children: Node[]} } DataNode */
+/** @typedef {{scope?: string, language?: string, children: Node[]} | string} Node */
+/** @typedef {{scope?: string, language?: string, children: Node[]} } DataNode */
 /** @typedef {import('highlight.js').Emitter} Emitter */
 /**  */
+
+/** @returns {DataNode} */
+const newNode = (opts = {}) => {
+  /** @type DataNode */
+  const result = { children: [] };
+  Object.assign(result, opts);
+  return result;
+};
 
 class TokenTree {
   constructor() {
     /** @type DataNode */
-    this.rootNode = { children: [] };
+    this.rootNode = newNode();
     this.stack = [this.rootNode];
   }
 
@@ -23,10 +31,10 @@ class TokenTree {
     this.top.children.push(node);
   }
 
-  /** @param {string} kind */
-  openNode(kind) {
+  /** @param {string} scope */
+  openNode(scope) {
     /** @type Node */
-    const node = { kind, children: [] };
+    const node = newNode({ scope });
     this.add(node);
     this.stack.push(node);
   }
@@ -98,13 +106,11 @@ class TokenTree {
 
   Minimal interface:
 
-  - addKeyword(text, kind)
   - addText(text)
-  - addSublanguage(emitter, subLanguageName)
+  - __addSublanguage(emitter, subLanguageName)
+  - startScope(scope)
+  - endScope()
   - finalize()
-  - openNode(kind)
-  - closeNode()
-  - closeAllNodes()
   - toHTML()
 
 */
@@ -123,18 +129,6 @@ export default class TokenTreeEmitter extends TokenTree {
 
   /**
    * @param {string} text
-   * @param {string} kind
-   */
-  addKeyword(text, kind) {
-    if (text === "") { return; }
-
-    this.openNode(kind);
-    this.addText(text);
-    this.closeNode();
-  }
-
-  /**
-   * @param {string} text
    */
   addText(text) {
     if (text === "") { return; }
@@ -142,15 +136,24 @@ export default class TokenTreeEmitter extends TokenTree {
     this.add(text);
   }
 
+  /** @param {string} scope */
+  startScope(scope) {
+    this.openNode(scope);
+  }
+
+  endScope() {
+    this.closeNode();
+  }
+
   /**
    * @param {Emitter & {root: DataNode}} emitter
    * @param {string} name
    */
-  addSublanguage(emitter, name) {
+  __addSublanguage(emitter, name) {
     /** @type DataNode */
     const node = emitter.root;
-    node.kind = name;
-    node.sublanguage = true;
+    if (name) node.scope = `language:${name}`;
+
     this.add(node);
   }
 
@@ -160,6 +163,7 @@ export default class TokenTreeEmitter extends TokenTree {
   }
 
   finalize() {
+    this.closeAllNodes();
     return true;
   }
 }
