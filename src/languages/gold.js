@@ -1,10 +1,9 @@
 /*
-Language: Go
-Author: Stephan Kountso aka StepLg <steplg@gmail.com>
-Contributors: Evgeny Stepanischev <imbolk@gmail.com>
-Description: Google go language (golang). For info about language
-Website: http://golang.org/
-Category: common, system
+Language: Gold
+Author: Carlo Kok <ck@remobjects.com>
+Contributor: Stephan Kountso aka StepLg <steplg@gmail.com>, Evgeny Stepanischev <imbolk@gmail.com>
+Description: Gold is RemObjects Software's Go-compatible language for the Elements compiler.
+Website: https://www.elementscompiler.com/elements/gold/
 */
 
 export default function(hljs) {
@@ -87,8 +86,8 @@ export default function(hljs) {
     built_in: BUILT_INS
   };
   return {
-    name: 'Go',
-    aliases: ['golang'],
+    name: 'Gold',
+    aliases: ['gold'],
     keywords: KEYWORDS,
     illegal: '</',
     contains: [

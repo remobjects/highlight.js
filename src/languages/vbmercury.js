@@ -1,9 +1,9 @@
 /*
-Language: Visual Basic .NET
-Description: Visual Basic .NET (VB.NET) is a multi-paradigm, object-oriented programming language, implemented on the .NET Framework.
-Authors: Poren Chiang <ren.chiang@gmail.com>, Jan Pilzer
-Website: https://docs.microsoft.com/dotnet/visual-basic/getting-started
-Category: common
+Language: Mercury (VB)
+Author: Carlo Kok <ck@remobjects.com>
+Contributor: Poren Chiang <ren.chiang@gmail.com>, Jan Pilzer
+Description: Mercury is RemObjects Software's Visual Basic-compatible language for the Elements compiler, with additional platform-specific extensions.
+Website: https://www.elementscompiler.com/elements/mercury/
 */
 
 /** @type LanguageFn */
@@ -131,16 +131,15 @@ export default function(hljs) {
   };
 
   return {
-    name: 'Visual Basic .NET',
-    aliases: [ 'vb' ],
+    name: 'Mercury',
+    aliases: [ 'vbmercury' ],
     case_insensitive: true,
     classNameAliases: {
       label: 'symbol'
     },
     keywords: {
       keyword:
-        'addhandler addressof alias and andalso ansi as ascending assembly async auto await boolean by byref byte byval call case catch cbool cbyte cchar cdate cdbl cdec char cint class clng cobj const continue csbyte cshort csng cstr ctype cuint culng cushort custom decimal declare default delegate descending dim directcast distinct do double each else elseif end endif enum equals erase error event exit extends false finally for friend from function get gettype getxmlnamespace global gosub goto group handles if implements imports in inherits integer interface into is isfalse isnot istrue iterator join key let lib like long loop me mod module mustinherit mustoverride mybase myclass namespace narrowing new next not nothing notinheritable notoverridable null object of on operator option optional or order orelse out overloads overridable overrides paramarray partial preserve private property protected public raiseevent readonly redim rem removehandler resume return sbyte select set shadows shared short single skip static step stop string structure sub synclock take then throw to true try trycast typeof uinteger ulong unicode until ushort using variant wend when where while widening with withevents writeonly xor yield zip'
-      
+        'ensure check invariants old require addhandler addressof alias and andalso ansi as ascending assembly async auto autoreleasepool await boolean by byref byte byval call case catch cbool cbyte cchar cdate cdbl cdec char cint class clng cobj const continue csbyte cshort csng cstr ctrytype ctype cuint culng cushort custom decimal declare default delegate descending dim directcast distinct do double dynamic each else elseif end endif enum equals erase error event exit extends false finally for friend from function get gettype getxmlnamespace global gosub goto group handles if implements imports in index inherits integer interface into is isfalse isnot istrue iterator join key lazy let lib like long loop mappedto matching me mid mod module mustinherit mustoverride mybase myclass mymapped namespace narrowing new next not nothing notinheritable notoverridable null object of off on operator option optional or order orelse out overloads overridable overrides paramarray partial preserve private property protected ptr public raiseevent readonly record redim rem removehandler resume return sbyte select set shadows shared short single skip static step stop string structure strict sub synclock take text then throw to true try trycast typeof uinteger ulong unicode unmanaged unsafe until ushort using variant wend when where while widening with withevents writeonly xor yield zip'
     },
     illegal:
       '//|\\{|\\}|endif|gosub|variant|wend|^\\$ ' /* reserved deprecated keywords */,
