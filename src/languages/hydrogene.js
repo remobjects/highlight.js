@@ -93,6 +93,7 @@ export default function(hljs) {
     'record',
     'ref',
     'return',
+    'scoped',
     'sealed',
     'sizeof',
     'stackalloc',
@@ -116,11 +117,14 @@ export default function(hljs) {
     'alias',
     'and',
     'ascending',
+    'args',
     'async',
     'await',
     'by',
     'descending',
+    'dynamic',
     'equals',
+    'file',
     'from',
     'get',
     'global',
@@ -136,7 +140,10 @@ export default function(hljs) {
     'or',
     'orderby',
     'partial',
+    'record',
     'remove',
+    'required',
+    'scoped',
     'select',
     'set',
     'unmanaged',
@@ -193,6 +200,11 @@ export default function(hljs) {
       }
     ],
     relevance: 0
+  };
+  const RAW_STRING = {
+    className: 'string',
+    begin: /"""("*)(?!")(.|\n)*?"""\1/,
+    relevance: 1
   };
   const VERBATIM_STRING = {
     className: 'string',
@@ -286,6 +298,7 @@ export default function(hljs) {
   ];
   const STRING = {
     variants: [
+      RAW_STRING,
       INTERPOLATED_VERBATIM_STRING,
       INTERPOLATED_STRING,
       VERBATIM_STRING,
