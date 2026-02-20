@@ -124,6 +124,7 @@ export default function(hljs) {
     'descending',
     'dynamic',
     'equals',
+    'field',
     'file',
     'from',
     'get',
