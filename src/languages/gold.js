@@ -108,14 +108,28 @@ export default function(hljs) {
         className: 'number',
         variants: [
           {
-            begin: hljs.C_NUMBER_RE + '[i]',
-            relevance: 1
+            match: /-?\b0[xX]\.[a-fA-F0-9](_?[a-fA-F0-9])*[pP][+-]?\d(_?\d)*i?/,
+            relevance: 0
           },
-          hljs.C_NUMBER_MODE
+          {
+            match: /-?\b0[xX](_?[a-fA-F0-9])+((\.([a-fA-F0-9](_?[a-fA-F0-9])*)?)?[pP][+-]?\d(_?\d)*)?i?/,
+            relevance: 0
+          },
+          {
+            match: /-?\b0[oO](_?[0-7])*i?/,
+            relevance: 0
+          },
+          {
+            match: /-?\.\d(_?\d)*([eE][+-]?\d(_?\d)*)?i?/,
+            relevance: 0
+          },
+          {
+            match: /-?\b\d(_?\d)*(\.(\d(_?\d)*)?)?([eE][+-]?\d(_?\d)*)?i?/,
+            relevance: 0
+          }
         ]
       },
-      {
-        begin: /:=/ // relevance booster
+      { begin: /:=/
       },
       {
         className: 'function',

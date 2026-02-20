@@ -7,7 +7,7 @@ Website: https://www.elementscompiler.com/elements/mercury/
 */
 
 /** @type LanguageFn */
-export default function(hljs) {
+export default function (hljs) {
   const regex = hljs.regex;
   /**
    * Character Literal
@@ -108,9 +108,7 @@ export default function(hljs) {
 
   const COMMENT = hljs.COMMENT(null, /$/, {
     variants: [
-      {
-        begin: /'/
-      },
+      { begin: /'/ },
       {
         // TODO: Use multi-class for leading spaces
         begin: /([\t ]|^)REM(?=\s)/
@@ -127,19 +125,36 @@ export default function(hljs) {
       keyword:
         'const disable else elseif enable end externalsource if region then'
     },
-    contains: [ COMMENT ]
+    contains: [COMMENT]
   };
 
   return {
     name: 'Mercury',
-    aliases: [ 'vbmercury' ],
+    aliases: ['vbmercury'],
     case_insensitive: true,
-    classNameAliases: {
-      label: 'symbol'
-    },
+    classNameAliases: { label: 'symbol' },
     keywords: {
       keyword:
-        'ensure check invariants old require addhandler addressof alias and andalso ansi as ascending assembly async auto autoreleasepool await boolean by byref byte byval call case catch cbool cbyte cchar cdate cdbl cdec char cint class clng cobj const continue csbyte cshort csng cstr ctrytype ctype cuint culng cushort custom decimal declare default delegate descending dim directcast distinct do double dynamic each else elseif end endif enum equals erase error event exit extends false finally for friend from function get gettype getxmlnamespace global gosub goto group handles if implements imports in index inherits integer interface into is isfalse isnot istrue iterator join key lazy let lib like long loop mappedto matching me mid mod module mustinherit mustoverride mybase myclass mymapped namespace narrowing new next not nothing notinheritable notoverridable null object of off on operator option optional or order orelse out overloads overridable overrides paramarray partial preserve private property protected ptr public raiseevent readonly record redim rem removehandler resume return sbyte select set shadows shared short single skip static step stop string structure strict sub synclock take text then throw to true try trycast typeof uinteger ulong unicode unmanaged unsafe until ushort using variant wend when where while widening with withevents writeonly xor yield zip'
+        'addhandler alias aggregate ansi as ascending async assembly auto autoreleasepool binary by byref byval ' /* a-b */
+        + 'call case catch check class compare const continue custom declare default delegate descending dim distinct do dynamic ' /* c-d */
+        + 'each ensure equals else elseif end enum erase error event exit explicit extends finally for friend from function ' /* e-f */
+        + 'get global goto group handles if implements imports in index inherits interface into invariants iterator ' /* g-i */
+        + 'join key lazy let lib like long loop mappedto matching me mid mod module mustinherit mustoverride mybase myclass mymapped ' /* j-m */
+        + 'namespace narrowing new next notinheritable notoverridable ' /* n */
+        + 'of off old on operator option optional or order orelse out overloads overridable overrides ' /* o */
+        + 'paramarray partial preserve private property protected ptr public ' /* p */
+        + 'raiseevent readonly record redim removehandler require resume return ' /* r */
+        + 'select set shadows shared skip static step stop structure strict sub synclock ' /* s */
+        + 'take text then throw to try unicode unmanaged unsafe until using when where while widening with withevents writeonly yield zip' /* t-z */,
+      built_in:
+        // Operators https://docs.microsoft.com/dotnet/visual-basic/language-reference/operators
+        'addressof and andalso await directcast gettype getxmlnamespace is isfalse isnot istrue like mod nameof new not or orelse trycast typeof xor '
+        // Type Conversion Functions https://docs.microsoft.com/dotnet/visual-basic/language-reference/functions/type-conversion-functions
+        + 'cbool cbyte cchar cdate cdbl cdec cint clng cobj csbyte cshort csng cstr cuint culng cushort',
+      type:
+        // Data types https://docs.microsoft.com/dotnet/visual-basic/language-reference/data-types
+        'boolean byte char date decimal double integer long object sbyte short single string uinteger ulong ushort',
+      literal: 'true false nothing'
     },
     illegal:
       '//|\\{|\\}|endif|gosub|variant|wend|^\\$ ' /* reserved deprecated keywords */,
