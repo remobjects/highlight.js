@@ -22,6 +22,29 @@ export default function (hljs) {
     '\\*\\)',
     { relevance: 10 }
   );
+  const RAW_STRING = {
+    className: 'string',
+    begin: /#+"{2,}/,
+    end: /"{2,}/
+  };
+  const INTERPOLATED_DOUBLE_STRING = {
+    className: 'string',
+    begin: /\$"/,
+    end: '"',
+    contains: [{ begin: '""' }]
+  };
+  const INTERPOLATED_SINGLE_STRING = {
+    className: 'string',
+    begin: /\$'/,
+    end: '\'',
+    contains: [{ begin: '\'\'' }]
+  };
+  const DOUBLE_STRING = {
+    className: 'string',
+    begin: '"',
+    end: '"',
+    contains: [{ begin: '""' }]
+  };
   const STRING = {
     className: 'string',
     begin: '\'',
@@ -30,7 +53,7 @@ export default function (hljs) {
   };
   const CHAR_STRING = {
     className: 'string',
-    begin: '(#\\d+)+'
+    begin: /(#\d+|#\$[0-9a-fA-F]+)+/
   };
   const FUNCTION = {
     beginKeywords: 'function constructor destructor procedure method',
@@ -44,6 +67,10 @@ export default function (hljs) {
         end: '\\)',
         keywords: OXYGENE_KEYWORDS,
         contains: [
+          RAW_STRING,
+          INTERPOLATED_DOUBLE_STRING,
+          INTERPOLATED_SINGLE_STRING,
+          DOUBLE_STRING,
           STRING,
           CHAR_STRING
         ]
@@ -63,11 +90,15 @@ export default function (hljs) {
     name: 'Oxygene',
     case_insensitive: true,
     keywords: OXYGENE_KEYWORDS,
-    illegal: '("|\\$[G-Zg-z]|\\/\\*|</|=>|->)',
+    illegal: '(\\$[G-Zg-z]|\\/\\*|</|=>|->)',
     contains: [
       CURLY_COMMENT,
       PAREN_COMMENT,
       hljs.C_LINE_COMMENT_MODE,
+      RAW_STRING,
+      INTERPOLATED_DOUBLE_STRING,
+      INTERPOLATED_SINGLE_STRING,
+      DOUBLE_STRING,
       STRING,
       CHAR_STRING,
       hljs.NUMBER_MODE,
