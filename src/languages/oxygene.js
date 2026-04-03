@@ -24,8 +24,18 @@ export default function (hljs) {
   );
   const RAW_STRING = {
     className: 'string',
-    begin: /#+"{2,}/,
-    end: /"{2,}/
+    begin: /#+("+)(?!")/,
+    end: /"+(?!")/,
+    'on:begin': (m, resp) => {
+      resp.data._quoteCount = m[1].length;
+    },
+    'on:end': (m, resp) => {
+      if (m[0].length !== resp.data._quoteCount) {
+        resp.ignoreMatch();
+      }
+    },
+    contains: [],
+    relevance: 1
   };
   const INTERPOLATED_DOUBLE_STRING = {
     className: 'string',
